@@ -94,7 +94,7 @@ private:
 
   // Drivers must implement functions that are listed in interface. Use override
   // keyword for virtual functions
-  status driver_position(float p_position) noexcept override
+  status driver_position(float p_position) override
   {
     // The range of p_position is from -100% to 100%. The value of p_position is
     // mapped within the float range of the pwm signal to get the decimal

@@ -23,7 +23,7 @@ struct fake_i2c : public hal::i2c
     spy_transaction;
 
 private:
-  status driver_configure(const settings& p_settings) noexcept
+  status driver_configure(const settings& p_settings)
   {
     return spy_configure.record(p_settings);
   }
@@ -31,7 +31,7 @@ private:
     [[maybe_unused]] hal::byte p_address,
     [[maybe_unused]] std::span<const hal::byte> p_data_out,
     [[maybe_unused]] std::span<hal::byte> p_data_in,
-    [[maybe_unused]] std::function<hal::timeout_function> p_timeout) noexcept
+    [[maybe_unused]] std::function<hal::timeout_function> p_timeout)
   {
     return spy_transaction.record(p_address, p_data_out, p_data_in, p_timeout);
   }
@@ -39,7 +39,8 @@ private:
 }  // namespace hal
 
 namespace hal {
-void minimum_speed_test() {
+void minimum_speed_test()
+{
   using namespace boost::ut;
 
   "hal::i2c::minimum_speed_i2c"_test = []() {

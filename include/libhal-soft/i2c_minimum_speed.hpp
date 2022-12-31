@@ -10,7 +10,7 @@ namespace hal {
  */
 
 [[nodiscard]] constexpr auto operator==(const i2c::settings& p_lhs,
-                                        const i2c::settings& p_rhs) noexcept
+                                        const i2c::settings& p_rhs)
 {
   return equals(p_lhs.clock_rate, p_rhs.clock_rate);
 }
@@ -44,7 +44,7 @@ private:
   {
   }
 
-  status driver_configure(const settings& p_new_setting) noexcept override
+  status driver_configure(const settings& p_new_setting) override
   {
     if (equals(p_new_setting.clock_rate, 0.0_Hz)) {
       return hal::new_error(std::errc::invalid_argument);
@@ -60,7 +60,7 @@ private:
     hal::byte p_address,
     std::span<const hal::byte> p_data_out,
     std::span<hal::byte> p_data_in,
-    std::function<hal::timeout_function> p_timeout) noexcept override
+    std::function<hal::timeout_function> p_timeout) override
   {
     return m_i2c->transaction(p_address, p_data_out, p_data_in, p_timeout);
   }

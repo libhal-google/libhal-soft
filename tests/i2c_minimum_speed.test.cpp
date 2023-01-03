@@ -31,7 +31,7 @@ private:
     [[maybe_unused]] hal::byte p_address,
     [[maybe_unused]] std::span<const hal::byte> p_data_out,
     [[maybe_unused]] std::span<hal::byte> p_data_in,
-    [[maybe_unused]] std::function<hal::timeout_function> p_timeout)
+    [[maybe_unused]] hal::function_ref<hal::timeout_function> p_timeout)
   {
     return spy_transaction.record(p_address, p_data_out, p_data_in, p_timeout);
   }

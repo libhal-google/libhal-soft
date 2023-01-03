@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libhal-util/math.hpp>
+#include <libhal/alias.hpp>
 #include <libhal/i2c.hpp>
 
 namespace hal {
@@ -60,7 +61,7 @@ private:
     hal::byte p_address,
     std::span<const hal::byte> p_data_out,
     std::span<hal::byte> p_data_in,
-    std::function<hal::timeout_function> p_timeout) override
+    hal::function_ref<hal::timeout_function> p_timeout) override
   {
     return m_i2c->transaction(p_address, p_data_out, p_data_in, p_timeout);
   }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libhal-util/math.hpp>
-#include <libhal/alias.hpp>
+#include <libhal/functional.hpp>
 #include <libhal/i2c.hpp>
 
 namespace hal {

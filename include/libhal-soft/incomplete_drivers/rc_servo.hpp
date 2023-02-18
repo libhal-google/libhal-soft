@@ -13,10 +13,6 @@
 // Keep driver within the namespace hal to not pollute global namespace
 namespace hal {
 /**
- * @addtogroup servo
- * @{
- */
-/**
  * @brief Generic RC servo driver.
  *
  */
@@ -121,6 +117,5 @@ private:
   hal::pwm* m_pwm;
   std::pair<float, float> m_percent_range;
 };
-/** @} */
 // Comment the end of the namepace and end the file with an extra line.
 }  // namespace hal

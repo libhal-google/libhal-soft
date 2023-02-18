@@ -1,4 +1,4 @@
-#include <libhal-soft/rc_servo.hpp>
+#include <libhal-soft/incomplete_drivers/rc_servo.hpp>
 
 #include <libhal-mock/pwm.hpp>
 #include <libhal-mock/testing.hpp>
@@ -6,7 +6,8 @@
 #include <boost/ut.hpp>
 
 namespace hal {
-void rc_servo_test() {
+void rc_servo_test()
+{
   using namespace boost::ut;
 
   "hal::servo::rc_servo::create"_test = []() {

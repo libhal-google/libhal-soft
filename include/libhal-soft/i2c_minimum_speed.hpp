@@ -57,7 +57,7 @@ private:
     return {};
   }
 
-  status driver_transaction(
+  result<transaction_t> driver_transaction(
     hal::byte p_address,
     std::span<const hal::byte> p_data_out,
     std::span<hal::byte> p_data_in,

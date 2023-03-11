@@ -9,9 +9,10 @@ void inert_steady_clock_test()
   "inert_steady_clock"_test = []() {
     // Setup
     constexpr auto expected_frequency = steady_clock::frequency_t{ 0.5f };
+    constexpr auto start_uptime = steady_clock::uptime_t{ 99 };
     constexpr auto expected_uptime = steady_clock::uptime_t{ 100 };
     auto test =
-      inert_steady_clock::create(expected_frequency, expected_uptime).value();
+      inert_steady_clock::create(expected_frequency, start_uptime).value();
 
     // Exercise
     auto frequency_result = test.frequency();

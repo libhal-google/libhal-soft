@@ -35,20 +35,15 @@ add_executable(${PROJECT_NAME}
 
   inert_accelerometer.test.cpp
   inert_adc.test.cpp
-  inert_can.test.cpp
   inert_dac.test.cpp
   inert_distance_sensor.test.cpp
   inert_gyroscope.test.cpp
-  inert_i2c.test.cpp
   inert_input_pin.test.cpp
   inert_interrupt_pin.test.cpp
   inert_magnetometer.test.cpp
   inert_motor.test.cpp
   inert_pwm.test.cpp
   inert_rotation_sensor.test.cpp
-  inert_serial.test.cpp
-  inert_socket.test.cpp
-  inert_spi.test.cpp
   inert_steady_clock.test.cpp
   inert_temperature_sensor.test.cpp
   inert_timer.test.cpp

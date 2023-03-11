@@ -15,7 +15,9 @@ public:
    *
    * @param p_frequency - frequency_t object to return when frequency() is
    * called
-   * @param p_uptime - uptime_t object to return when uptime() is called
+   * @param p_uptime - uptime_t object with the starting value that will be
+   * returned when uptime() is called. The uptime will increment by 1 each time
+   * uptime() is called.
    * @return result<inert_steady_clock> - Constructed inert_steady_clock object
    */
   static result<inert_steady_clock> create(frequency_t p_frequency,
@@ -36,6 +38,7 @@ private:
   };
   result<uptime_t> driver_uptime()
   {
+    m_uptime.ticks++;
     return m_uptime;
   };
 

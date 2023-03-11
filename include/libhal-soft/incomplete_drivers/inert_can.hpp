@@ -15,7 +15,9 @@ public:
   /**
    * @brief Factory function to create inert_can object
    *
-   * @param p_bus_on - State of inert can bus
+   * @param p_bus_on - State of inert can bus. Setting this value to true will
+   * return success when bus_on() is called, and setting this value to false
+   * will return an error when bus_on() is caled.
    * @return result<inert_can> - Constructed inert_can object
    */
   static result<inert_can> create(bool p_bus_on)

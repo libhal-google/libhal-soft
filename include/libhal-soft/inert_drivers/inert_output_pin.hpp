@@ -13,7 +13,8 @@ public:
   /**
    * @brief Factory function to create inert_output_pin
    *
-   * @param p_level - level_t object to retrun when level() is called
+   * @param p_level - level_t object to return when level() is called. This
+   * value can be changed by using level(bool) after creation.
    * @return result<inert_output_pin> - Constructed inert_output_pin object
    */
   static result<inert_output_pin> create(bool p_level)

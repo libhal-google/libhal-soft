@@ -15,6 +15,8 @@ extern void inert_rotation_sensor_test();
 extern void inert_steady_clock_test();
 extern void inert_temperature_sensor_test();
 extern void inert_timer_test();
+extern void rc_servo_test();
+
 }  // namespace hal
 
 int main()
@@ -35,4 +37,5 @@ int main()
   hal::inert_steady_clock_test();
   hal::inert_temperature_sensor_test();
   hal::inert_timer_test();
+  hal::rc_servo_test();
 }

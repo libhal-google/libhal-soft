@@ -32,6 +32,7 @@ find_package(libhal-mock REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME}
   i2c_minimum_speed.test.cpp
+  rc_servo.test.cpp
 
   inert_accelerometer.test.cpp
   inert_adc.test.cpp

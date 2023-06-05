@@ -15,10 +15,17 @@
 #include <libhal-soft/i2c_minimum_speed.hpp>
 
 #include <libhal-mock/testing.hpp>
+#include <libhal-util/math.hpp>
 
 #include <boost/ut.hpp>
 
 namespace hal {
+
+[[nodiscard]] constexpr auto operator==(const i2c::settings& p_lhs,
+                                        const i2c::settings& p_rhs)
+{
+  return hal::equals(p_lhs.clock_rate, p_rhs.clock_rate);
+}
 
 struct fake_i2c : public hal::i2c
 {
@@ -72,7 +79,7 @@ void minimum_speed_test()
       constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
 
       // Exercise
-      auto mock = hal::minimum_speed_i2c::create(mock_i2c);
+      auto mock = hal::minimum_speed_i2c::create(mock_i2c).value();
 
       auto result1 = mock.configure(expected_upper_boundary);
       auto result2 = mock.configure(minimum_default);
@@ -100,7 +107,8 @@ void minimum_speed_test()
       constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
 
       // Exercise
-      auto mock = hal::minimum_speed_i2c::create(mock_i2c, device_frequency);
+      auto mock =
+        hal::minimum_speed_i2c::create(mock_i2c, device_frequency).value();
 
       auto result1 = mock.configure(expected_upper_boundary);
       auto result2 = mock.configure(choosen_frequency);
@@ -129,7 +137,7 @@ void minimum_speed_test()
         return {};
       };
       hal::fake_i2c mock_i2c;
-      auto mock = hal::minimum_speed_i2c::create(mock_i2c);
+      auto mock = hal::minimum_speed_i2c::create(mock_i2c).value();
 
       // Exercise
       auto result1 =

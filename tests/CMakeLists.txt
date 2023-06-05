@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,9 +63,12 @@ add_executable(${PROJECT_NAME}
   inert_temperature_sensor.test.cpp
   inert_timer.test.cpp
 
+  ../src/i2c_minimum_speed.cpp
+  ../src/rc_servo.cpp
+
   main.test.cpp)
 
-target_include_directories(${PROJECT_NAME} PUBLIC . ../include)
+target_include_directories(${PROJECT_NAME} PUBLIC . ../include ../src)
 target_compile_options(${PROJECT_NAME} PRIVATE
   --coverage
   -fprofile-arcs
@@ -84,17 +87,8 @@ target_link_options(${PROJECT_NAME} PRIVATE
   -fprofile-arcs
   -ftest-coverage
   ${ASAN_FLAG})
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-  boost-ext-ut::ut 
-  libhal::libhal 
-  libhal::util 
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  boost-ext-ut::ut
+  libhal::libhal
+  libhal::util
   libhal::mock)
-
-add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  -P ${CMAKE_SOURCE_DIR}/remove_gcda.cmake
-  COMMENT "Deleting Previous Coverage Files..."
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-  

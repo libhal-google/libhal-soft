@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <libhal-soft/inert_drivers/inert_pwm.hpp>
+#include <libhal-soft/rc_servo.hpp>
+
 int main()
 {
+  auto pwm = hal::inert_pwm::create().value();
+  auto rc_servo = hal::rc_servo::create(pwm, {});
+
   return 0;
 }

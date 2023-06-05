@@ -25,14 +25,11 @@ on:
 
 jobs:
   checks:
-    uses: libhal/ci/.github/workflows/library.yml@2.1.0
+    uses: libhal/ci/.github/workflows/library.yml@2.2.0
     with:
       library: libhal-soft
       coverage: true
     secrets: inherit
   devices:
-    uses: libhal/ci/.github/workflows/device_deploy.yml@2.1.0
-    with:
-      library: libhal-soft
-      coverage: true
+    uses: libhal/ci/.github/workflows/device_deploy.yml@2.2.0
     secrets: inherit

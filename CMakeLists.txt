@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +14,24 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-function(remove_gcda)
-  file(GLOB_RECURSE GCDA_FILES ${CMAKE_BINARY_DIR}/**/*.gcda)
+project(libhal-soft VERSION 0.0.1 LANGUAGES CXX)
 
-  if(GCDA_FILES)
-    file(REMOVE ${GCDA_FILES})
-  endif()
-endfunction()
+find_package(libhal REQUIRED CONFIG)
+find_package(libhal-util REQUIRED CONFIG)
 
-remove_gcda()
+if(NOT BUILD_TESTING STREQUAL OFF)
+  add_subdirectory(tests)
+endif()
+
+add_library(libhal-soft
+  src/rc_servo.cpp
+  src/i2c_minimum_speed.cpp)
+
+target_include_directories(libhal-soft PUBLIC include)
+target_compile_features(libhal-soft PRIVATE cxx_std_20)
+target_link_libraries(libhal-soft PRIVATE
+  libhal::libhal
+  libhal::util
+)
+
+install(TARGETS libhal-soft)

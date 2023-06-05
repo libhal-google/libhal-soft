@@ -21,11 +21,17 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 12 * * 0'
+    - cron: "0 12 * * 0"
 
 jobs:
-  lint:
-    uses: libhal/ci/.github/workflows/library.yml@main
+  checks:
+    uses: libhal/ci/.github/workflows/library.yml@2.1.0
+    with:
+      library: libhal-soft
+      coverage: true
+    secrets: inherit
+  devices:
+    uses: libhal/ci/.github/workflows/device_deploy.yml@2.1.0
     with:
       library: libhal-soft
       coverage: true

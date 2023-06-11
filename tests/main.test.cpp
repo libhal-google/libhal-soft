@@ -13,6 +13,7 @@
 // limitations under the License.
 
 namespace hal {
+extern void adc_mux_test();
 extern void minimum_speed_test();
 
 extern void inert_accelerometer_test();
@@ -35,6 +36,7 @@ extern void rc_servo_test();
 
 int main()
 {
+  hal::adc_mux_test();
   hal::minimum_speed_test();
 
   hal::inert_accelerometer_test();

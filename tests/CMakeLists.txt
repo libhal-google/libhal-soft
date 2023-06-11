@@ -45,6 +45,7 @@ find_package(libhal-util REQUIRED CONFIG)
 find_package(libhal-mock REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME}
+  adc_mux.test.cpp
   i2c_minimum_speed.test.cpp
   rc_servo.test.cpp
 

@@ -13,111 +13,93 @@
 // limitations under the License.
 
 #pragma once
+
 #include <array>
-#include <libhal-util/map.hpp>
-#include <libhal-util/math.hpp>
-#include <libhal/adc.hpp>
-#include <libhal/error.hpp>
-#include <libhal/output_pin.hpp>
-#include <libhal/steady_clock.hpp>
 #include <span>
 
-using namespace hal::literals;
-using namespace std::chrono_literals;
+#include <libhal/adc.hpp>
+#include <libhal/output_pin.hpp>
+#include <libhal/steady_clock.hpp>
 
 namespace hal {
 
-// This function does not take into account setup and hold times.
-hal::status set_mux_channel(uint32_t p_position,
-                            std::span<hal::output_pin*> p_signal_pins)
-{
-
-  for (int i = 0; i < static_cast<int>(p_signal_pins.size()); i++) {
-
-    bool value = bool(p_position & (1 << i));
-    HAL_CHECK(p_signal_pins[i]->level(value));
-  }
-  return hal::success();
-}
-
 /**
- * @brief A driver for Analog to Digital mulitplexers, creates adc pin objects
- * for each mux output
+ * @brief A driver for an ADC multiplexer that manages and reads ADC mux pins.
+ * This driver is intended to be used with multiplexers that use digital
+ * signals. An ADC multiplexer can be used to expand the number of input
+ * channels of an ADC.
  */
 class adc_multiplexer
 {
 public:
   /**
-   * @brief An internal class of a hal ADC implimentation to represent a
-   * multiplexer pin
-   */
-  class adc_mux_pin : public hal::adc
-  {
-  public:
-    /** @brief An internal constructor to build an adc mux pin.
-     * @param p_mux_port the channel port of the pin on the mux itself.
-     * @param p_mux A pointer to the multiplexer.
-     * */
-    adc_mux_pin(uint8_t p_mux_port, adc_multiplexer* p_mux)
-      : m_mux_port{ p_mux_port }
-      , m_mux{ p_mux } {};  // TODO add m_mux
-
-    /**
-     * @brief Reads the pin.
-     */
-    hal::result<read_t> driver_read() override
-    {
-      return m_mux->read_channel(m_mux_port);
-    }
-
-  private:
-    const uint8_t m_mux_port;
-    adc_multiplexer* m_mux;
-  };
-
-  /**
-   * @param p_signal_pins A span of output pins to represent the signal pins of
-   * the mux, assuming the mux signals digitally.
-   * @param p_source_pin The adc source pin that reads the output of the mux.
-   */
-  adc_multiplexer(std::span<hal::output_pin*> p_signal_pins,
-                  hal::adc* p_source_pin)
-    : m_signal_pins{ p_signal_pins }
-    , m_source_pin{ p_source_pin } {};
-
-  /**
-   * @brief Returns a multiplexer ADC pin
-   * @param p_channel The channel number of the pin.
-   */
-  hal::result<adc_mux_pin> pin_factory(uint8_t p_channel)
-  {
-    // TODO: Ask if we should keep track of channels in use, if a port is asked
-    // for again, disallow it.
-    const std::uint32_t max_size = 1 << m_signal_pins.size();
-    if (p_channel >= max_size) {
-      return hal::new_error(
-        "Unable to add any more pins to this multiplexer.\n");
-    }
-
-    return adc_mux_pin(p_channel, this);
-  }
-
-private:
-  /**
-   * @brief Reads the channel
+   * @brief Constructs a new adc_multiplexer object.
    *
-   * @param p_mux_port
-   * @return hal::result<hal::adc::read_t>
+   * @param p_signal_pins A span of the output signal pins used to determine the
+   * channel on the mux.
+   * @param p_source_pin The output adc pin of the multiplexer.
+   * @param p_clock A steady clock used for delaying 500ns to give time to the
+   * mux to have an updated signal.
+   * @return The constructed adc_multiplexer.
    */
-  hal::result<hal::adc::read_t> read_channel(uint8_t p_mux_port)
-  {
-    set_mux_channel(p_mux_port, m_signal_pins);
-    return HAL_CHECK(m_source_pin->read());
-  }
+  static adc_multiplexer create(std::span<hal::output_pin*> p_signal_pins,
+                                hal::adc& p_source_pin,
+                                hal::steady_clock& p_clock);
+
+  /**
+   * @brief Reads a channel on the mux.
+   *
+   * @param p_mux_port The port to be read. If an out of bounds port number is
+   * passed, an error-typed result is returned.
+   * @return The hal::adc::read_t struct of the read value or an error if an
+   * invalid port is given.
+   */
+  hal::result<hal::adc::read_t> read_channel(std::uint16_t p_mux_port);
+
+  /**
+   * @brief Gets the highest capacity channel held by the ADC mux object.
+   * This is caluclated based off of how many source pins are available.
+   *
+   * @return The maximum channel number for this mux (2^n states, where n is
+   * number of source pins).
+   */
+  int get_max_channel();
 
 private:
-  std::span<hal::output_pin*> m_signal_pins;
+  adc_multiplexer(std::span<output_pin*> p_signal_pins,
+                  hal::adc& p_source_pin,
+                  hal::steady_clock& p_clock);
+
+private:
+  std::span<output_pin*> m_signal_pins;
   hal::adc* m_source_pin;
+  hal::steady_clock* m_clock;
 };
+
+/**
+ * @brief A class that represents a multiplexer pin for ADC.
+ */
+class adc_mux_pin : public hal::adc
+{
+  friend result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
+                                      std::uint8_t p_channel);
+
+private:
+  adc_mux_pin(adc_multiplexer& p_mux, std::uint8_t p_mux_port);
+  hal::result<read_t> driver_read() override;
+
+  adc_multiplexer* m_mux;
+  std::uint8_t m_mux_port;
+};
+
+/**
+ * @brief Returns a multiplexer ADC pin.
+ *
+ * @param p_multiplexer The multiplexer object to manage each mux pin.
+ * @param p_channel The channel number of the pin.
+ * @return A newly constructed ADC multiplexer pin.
+ */
+result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
+                             std::uint8_t p_channel);
 
 }  // namespace hal

@@ -19,9 +19,14 @@ project(libhal-soft VERSION 0.0.1 LANGUAGES CXX)
 find_package(libhal REQUIRED CONFIG)
 find_package(libhal-util REQUIRED CONFIG)
 
+if(NOT BUILD_TESTING STREQUAL OFF)
+  add_subdirectory(tests)
+endif()
+
 add_library(libhal-soft
   src/rc_servo.cpp
-  src/i2c_minimum_speed.cpp)
+  src/i2c_minimum_speed.cpp
+  src/adc_mux.cpp)
 
 target_include_directories(libhal-soft PUBLIC include)
 target_compile_features(libhal-soft PRIVATE cxx_std_20)
@@ -29,9 +34,5 @@ target_link_libraries(libhal-soft PRIVATE
   libhal::libhal
   libhal::util
 )
-
-if(NOT BUILD_TESTING STREQUAL OFF)
-  add_subdirectory(tests)
-endif()
 
 install(TARGETS libhal-soft)

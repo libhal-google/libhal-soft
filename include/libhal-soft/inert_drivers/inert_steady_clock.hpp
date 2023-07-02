@@ -46,11 +46,12 @@ private:
     , m_uptime(p_uptime)
   {
   }
-  result<frequency_t> driver_frequency()
+  frequency_t driver_frequency()
   {
     return m_frequency;
   };
-  result<uptime_t> driver_uptime()
+
+  uptime_t driver_uptime()
   {
     m_uptime.ticks++;
     return m_uptime;

@@ -33,11 +33,9 @@ void inert_steady_clock_test()
     auto uptime_result = test.uptime();
 
     // Verify
-    expect(bool{ frequency_result });
-    expect(bool{ uptime_result });
     expect(that % expected_frequency.operating_frequency ==
-           frequency_result.value().operating_frequency);
-    expect(that % expected_uptime.ticks == uptime_result.value().ticks);
+           frequency_result.operating_frequency);
+    expect(that % expected_uptime.ticks == uptime_result.ticks);
   };
 };
 }  // namespace hal

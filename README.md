@@ -5,8 +5,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/libhal/libhal-soft.svg)](https://github.com/libhal/libhal-soft/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/libhal/libhal-soft.svg)](https://github.com/libhal/libhal-soft/network)
 [![GitHub issues](https://img.shields.io/github/issues/libhal/libhal-soft.svg)](https://github.com/libhal/libhal-soft/issues)
-[![Latest Version](https://libhal.github.io/libhal-soft/latest_version.svg)](https://github.com/libhal/libhal-soft/blob/main/conanfile.py)
-[![ConanCenter Version](https://repology.org/badge/version-for-repo/conancenter/libhal-soft.svg)](https://conan.io/center/libhal-soft)
 
 Library for generic soft drivers officially supported by libhal
 
@@ -48,4 +46,3 @@ Apache 2.0; see [`LICENSE`](LICENSE) for details.
 This project is not an official Google project. It is not supported by
 Google and Google specifically disclaims all warranties as to its quality,
 merchantability, or fitness for a particular purpose.
-

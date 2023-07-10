@@ -63,9 +63,6 @@ add_executable(${PROJECT_NAME}
   inert_temperature_sensor.test.cpp
   inert_timer.test.cpp
 
-  ../src/i2c_minimum_speed.cpp
-  ../src/rc_servo.cpp
-
   main.test.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC . ../include ../src)
@@ -91,4 +88,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   boost-ext-ut::ut
   libhal::libhal
   libhal::util
-  libhal::mock)
+  libhal::mock
+  libhal-soft)

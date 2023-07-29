@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_i2c_test()
 {
   using namespace boost::ut;
@@ -41,4 +41,4 @@ void inert_i2c_test()
     expect(bool{ transaction_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

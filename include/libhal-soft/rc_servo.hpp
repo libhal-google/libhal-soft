@@ -21,7 +21,7 @@
 #include <libhal/servo.hpp>
 
 // Keep drivers within the namespace hal to not pollute global namespace
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Generic RC servo driver.
  *
@@ -86,4 +86,4 @@ private:
   std::pair<float, float> m_angle_range;
 };
 // Comment the end of the namespace and end the file with an extra line.
-}  // namespace hal
+}  // namespace hal::soft

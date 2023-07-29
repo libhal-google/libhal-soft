@@ -16,7 +16,7 @@
 
 #include <libhal/temperature_sensor.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of temperature sensing hardware
  *
@@ -49,4 +49,4 @@ private:
 
   read_t m_temperature;
 };
-}  // namespace hal
+}  // namespace hal::soft

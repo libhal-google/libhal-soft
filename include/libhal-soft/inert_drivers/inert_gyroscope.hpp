@@ -16,7 +16,7 @@
 
 #include <libhal/gyroscope.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of angular velocity sensing hardware
  *
@@ -48,4 +48,4 @@ private:
 
   read_t m_result;
 };
-}  // namespace hal
+}  // namespace hal::soft

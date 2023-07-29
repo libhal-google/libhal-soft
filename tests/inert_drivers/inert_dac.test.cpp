@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_pwm.hpp>
+#include <libhal-soft/inert_drivers/inert_dac.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_pwm_test()
+namespace hal::soft {
+void inert_dac_test()
 {
   using namespace boost::ut;
-  "inert_pwm"_test = []() {
+  "inert_dac"_test = []() {
     // Setup
-    auto test = inert_pwm::create().value();
+    auto test = inert_dac::create().value();
 
     // Exercise
-    auto frequency_result = test.frequency(0.1f);
-    auto duty_cycle_result = test.duty_cycle(0.1f);
+    auto result = test.write(0.1f);
 
     // Verify
-    expect(bool{ frequency_result });
-    expect(bool{ duty_cycle_result });
+    expect(bool{ result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

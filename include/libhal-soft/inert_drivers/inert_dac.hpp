@@ -16,7 +16,7 @@
 
 #include <libhal/dac.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of Digital to Analog Converter (DAC) hardware
  *
@@ -44,4 +44,4 @@ private:
     return write_t{};
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

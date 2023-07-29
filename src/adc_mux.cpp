@@ -1,7 +1,7 @@
 #include <libhal-soft/adc_mux.hpp>
 #include <libhal-util/steady_clock.hpp>
 
-namespace hal {
+namespace hal::soft {
 using namespace hal::literals;
 using namespace std::chrono_literals;
 
@@ -27,15 +27,6 @@ hal::status set_mux_channel(std::uint16_t p_position,
   return success();
 }
 }  // namespace
-
-result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
-                             std::uint8_t p_channel)
-{
-  if (p_channel > p_multiplexer.get_max_channel()) {
-    return hal::new_error(1);
-  }
-  return adc_mux_pin(p_multiplexer, p_channel);
-}
 
 // Implementations for adc_multiplexer
 
@@ -77,4 +68,15 @@ hal::result<hal::adc::read_t> adc_mux_pin::driver_read()
 {
   return m_mux->read_channel(m_mux_port);
 }
-}  // namespace hal
+}  // namespace hal::soft
+
+namespace hal::make {
+result<hal::soft::adc_mux_pin> adc(hal::soft::adc_multiplexer& p_multiplexer,
+                                   std::uint8_t p_channel)
+{
+  if (p_channel > p_multiplexer.get_max_channel()) {
+    return hal::new_error(std::errc::result_out_of_range);
+  }
+  return hal::soft::adc_mux_pin(p_multiplexer, p_channel);
+}
+}  // namespace hal::make

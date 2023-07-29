@@ -16,7 +16,7 @@
 
 #include <libhal/motor.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of open loop motorized actuator hardware
  *
@@ -44,4 +44,4 @@ private:
     return power_t{};
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

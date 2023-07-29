@@ -21,8 +21,25 @@
 #include <libhal/output_pin.hpp>
 #include <libhal/steady_clock.hpp>
 
-namespace hal {
+namespace hal::soft {
+class adc_multiplexer;
+class adc_mux_pin;
+}  // namespace hal::soft
 
+namespace hal::make {
+/**
+ * @brief Returns an ADC pin from the multiplexer.
+ *
+ * @param p_multiplexer the adc multiplexer with the desire adc channel pin
+ * @param p_channel The channel number of the pin
+ * @return A newly constructed ADC multiplexer pin.
+ * @throws std::errc::
+ */
+result<hal::soft::adc_mux_pin> adc(hal::soft::adc_multiplexer& p_multiplexer,
+                                   std::uint8_t p_channel);
+}  // namespace hal::make
+
+namespace hal::soft {
 /**
  * @brief A driver for an ADC multiplexer that manages and reads ADC mux pins.
  * This driver is intended to be used with multiplexers that use digital
@@ -81,8 +98,9 @@ private:
  */
 class adc_mux_pin : public hal::adc
 {
-  friend result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
-                                      std::uint8_t p_channel);
+  friend hal::result<adc_mux_pin>(
+    ::hal::make::adc(hal::soft::adc_multiplexer& p_multiplexer,
+                     std::uint8_t p_channel));
 
 private:
   adc_mux_pin(adc_multiplexer& p_mux, std::uint8_t p_mux_port);
@@ -91,15 +109,4 @@ private:
   adc_multiplexer* m_mux;
   std::uint8_t m_mux_port;
 };
-
-/**
- * @brief Returns a multiplexer ADC pin.
- *
- * @param p_multiplexer The multiplexer object to manage each mux pin.
- * @param p_channel The channel number of the pin.
- * @return A newly constructed ADC multiplexer pin.
- */
-result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
-                             std::uint8_t p_channel);
-
-}  // namespace hal
+}  // namespace hal::soft

@@ -16,7 +16,7 @@
 
 #include <libhal/input_pin.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of digital input pin hardware
  *
@@ -53,4 +53,4 @@ private:
 
   level_t m_level;
 };
-}  // namespace hal
+}  // namespace hal::soft

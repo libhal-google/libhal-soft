@@ -16,7 +16,7 @@
 
 #include <libhal/pwm.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of Pulse Width Modulation (PWM) channel hardware
  *
@@ -49,4 +49,4 @@ private:
     return duty_cycle_t{};
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_can_test()
 {
   using namespace boost::ut;
@@ -42,4 +42,4 @@ void inert_can_test()
     expect(!bool{ bus_off_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

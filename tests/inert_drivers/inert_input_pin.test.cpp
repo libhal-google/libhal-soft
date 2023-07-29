@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_input_pin_test()
 {
   using namespace boost::ut;
@@ -41,4 +41,4 @@ void inert_input_pin_test()
     expect(that % false == level_low_result.value().state);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

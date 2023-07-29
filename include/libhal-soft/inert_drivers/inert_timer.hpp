@@ -16,7 +16,7 @@
 
 #include <libhal/timer.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of timer hardware
  *
@@ -61,4 +61,4 @@ private:
 
   is_running_t m_is_running;
 };
-}  // namespace hal
+}  // namespace hal::soft

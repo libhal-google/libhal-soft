@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_steady_clock_test()
 {
   using namespace boost::ut;
@@ -38,4 +38,4 @@ void inert_steady_clock_test()
     expect(that % expected_uptime.ticks == uptime_result.ticks);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

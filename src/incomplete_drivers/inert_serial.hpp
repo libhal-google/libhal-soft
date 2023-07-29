@@ -16,7 +16,7 @@
 
 #include <libhal/serial.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of serial communication protocol hardware
  *
@@ -67,4 +67,4 @@ private:
   write_t m_write_data;
   read_t m_read_data;
 };
-}  // namespace hal
+}  // namespace hal::soft

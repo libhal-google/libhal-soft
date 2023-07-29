@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_serial_test()
 {
   using namespace boost::ut;
@@ -41,4 +41,4 @@ void inert_serial_test()
     expect(bool{ flush_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

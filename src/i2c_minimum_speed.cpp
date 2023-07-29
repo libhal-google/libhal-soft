@@ -16,7 +16,7 @@
 
 #include <libhal-util/math.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @addtogroup i2c
  * @{
@@ -55,4 +55,4 @@ result<i2c::transaction_t> minimum_speed_i2c::driver_transaction(
   return m_i2c->transaction(p_address, p_data_out, p_data_in, p_timeout);
 }
 /** @} */
-}  // namespace hal
+}  // namespace hal::soft

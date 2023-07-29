@@ -16,7 +16,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy
 from conan.tools.build import check_min_cppstd
-from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -25,7 +24,7 @@ required_conan_version = ">=1.50.0"
 
 class libhal_soft_conan(ConanFile):
     name = "libhal-soft"
-    version = "2.0.0"
+    version = "3.0.0"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libhal.github.io/libhal-soft"

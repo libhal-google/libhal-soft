@@ -16,7 +16,7 @@
 
 #include <libhal/i2c.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief A i2c wrapper to ensure that the lowest i2c device frequency is used.
  *
@@ -51,4 +51,4 @@ private:
   hal::i2c* m_i2c;
   hertz m_lowest_seen_frequency;
 };
-}  // namespace hal
+}  // namespace hal::soft

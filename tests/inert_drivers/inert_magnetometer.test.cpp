@@ -12,23 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_motor.hpp>
+#include <libhal-soft/inert_drivers/inert_magnetometer.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_motor_test()
+namespace hal::soft {
+void inert_magnetometer_test()
 {
   using namespace boost::ut;
-  "inert_motor"_test = []() {
+  "inert_magnetometer"_test = []() {
     // Setup
-    auto test = inert_motor::create().value();
+    constexpr auto expected_read = magnetometer::read_t{ 0.1f, 0.2f, 0.3f };
+    auto test = inert_magnetometer::create(expected_read).value();
 
     // Exercise
-    auto result = test.power(0.1f);
+    auto result = test.read();
 
     // Verify
     expect(bool{ result });
+    expect(that % expected_read.x == result.value().x);
+    expect(that % expected_read.y == result.value().y);
+    expect(that % expected_read.z == result.value().z);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

@@ -16,7 +16,7 @@
 
 #include <libhal/distance_sensor.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of linear distance hardware
  *
@@ -49,4 +49,4 @@ private:
 
   read_t m_result;
 };
-}  // namespace hal
+}  // namespace hal::soft

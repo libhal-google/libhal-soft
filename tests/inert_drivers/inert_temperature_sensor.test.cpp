@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_distance_sensor.hpp>
+#include <libhal-soft/inert_drivers/inert_temperature_sensor.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_distance_sensor_test()
+namespace hal::soft {
+void inert_temperature_sensor_test()
 {
   using namespace boost::ut;
-  "inert_distance_sensor"_test = []() {
+  "inert_temperature_sensor"_test = []() {
     // Setup
-    constexpr auto expected_read = distance_sensor::read_t{ 0.1f };
-    auto test = inert_distance_sensor::create(expected_read).value();
+    constexpr auto expected_temp = temperature_sensor::read_t{ 0.5f };
+    auto test = inert_temperature_sensor::create(expected_temp).value();
 
     // Exercise
     auto result = test.read();
 
     // Verify
     expect(bool{ result });
-    expect(that % expected_read.distance == result.value().distance);
+    expect(that % expected_temp.temperature == result.value().temperature);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

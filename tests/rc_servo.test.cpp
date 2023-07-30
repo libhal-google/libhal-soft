@@ -19,7 +19,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void rc_servo_test()
 {
   using namespace boost::ut;
@@ -32,17 +32,17 @@ void rc_servo_test()
 
     // Exercise
     // use defaults
-    auto servo0 = hal::rc_servo::create(pwm0, {});
+    auto servo0 = rc_servo::create(pwm0, {});
     // 100Hz (or 10ms per update) with 500us being max negative start and 2500us
     // being max positive.
-    auto servo1 = hal::rc_servo::create(pwm1,
-                                        {
-                                          .frequency = 100,
-                                          .min_microseconds = 500,
-                                          .max_microseconds = 2500,
-                                        });
+    auto servo1 = rc_servo::create(pwm1,
+                                   {
+                                     .frequency = 100,
+                                     .min_microseconds = 500,
+                                     .max_microseconds = 2500,
+                                   });
     pwm2.spy_frequency.trigger_error_on_call(1);
-    auto servo2 = hal::rc_servo::create(pwm2, {});
+    auto servo2 = rc_servo::create(pwm2, {});
 
     // Verify
     expect(bool{ servo0 });
@@ -65,14 +65,14 @@ void rc_servo_test()
     constexpr auto angle4 = hal::degrees(180);
 
     hal::mock::pwm pwm;
-    auto servo = hal::rc_servo::create(pwm,
-                                       {
-                                         .frequency = 100,
-                                         .min_angle = 0,
-                                         .max_angle = 180,
-                                         .min_microseconds = 500,
-                                         .max_microseconds = 2500,
-                                       })
+    auto servo = rc_servo::create(pwm,
+                                  {
+                                    .frequency = 100,
+                                    .min_angle = 0,
+                                    .max_angle = 180,
+                                    .min_microseconds = 500,
+                                    .max_microseconds = 2500,
+                                  })
                    .value();
 
     // Exercise
@@ -116,14 +116,14 @@ void rc_servo_test()
     constexpr auto angle4 = hal::degrees(90);
 
     hal::mock::pwm pwm;
-    auto servo = hal::rc_servo::create(pwm,
-                                       {
-                                         .frequency = 100,
-                                         .min_angle = -90,
-                                         .max_angle = 90,
-                                         .min_microseconds = 500,
-                                         .max_microseconds = 2500,
-                                       })
+    auto servo = rc_servo::create(pwm,
+                                  {
+                                    .frequency = 100,
+                                    .min_angle = -90,
+                                    .max_angle = 90,
+                                    .min_microseconds = 500,
+                                    .max_microseconds = 2500,
+                                  })
                    .value();
 
     // Exercise
@@ -157,12 +157,12 @@ void rc_servo_test()
     hal::mock::pwm pwm;
     constexpr hal::degrees min_angle = 0.0f;
     constexpr hal::degrees max_angle = 90.0f;
-    auto test = hal::rc_servo::create(pwm,
-                                      {
-                                        .frequency = 100,
-                                        .min_microseconds = 500,
-                                        .max_microseconds = 2500,
-                                      })
+    auto test = rc_servo::create(pwm,
+                                 {
+                                   .frequency = 100,
+                                   .min_microseconds = 500,
+                                   .max_microseconds = 2500,
+                                 })
                   .value();
 
     // Exercise
@@ -181,4 +181,4 @@ void rc_servo_test()
       []() { expect(false) << "None of the above errors were thrown!"; });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

@@ -16,7 +16,7 @@
 
 #include <libhal/rotation_sensor.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of rotation measuring hardware
  *
@@ -49,4 +49,4 @@ private:
 
   read_t m_position;
 };
-}  // namespace hal
+}  // namespace hal::soft

@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_socket_test()
 {
   using namespace boost::ut;
@@ -39,4 +39,4 @@ void inert_socket_test()
     expect(bool{ read_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

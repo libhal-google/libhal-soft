@@ -16,7 +16,7 @@
 
 #include <libhal/spi.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of Serial peripheral interface (SPI)
  * communication protocol hardware
@@ -53,4 +53,4 @@ private:
     return transfer_t{};
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

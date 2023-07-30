@@ -18,7 +18,7 @@
 
 #include <functional>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of Controller Area Network (CAN bus) hardware
  *
@@ -68,4 +68,4 @@ private:
 
   bool m_bus_on;
 };
-}  // namespace hal
+}  // namespace hal::soft

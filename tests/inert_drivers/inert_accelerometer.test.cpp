@@ -12,25 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_temperature_sensor.hpp>
+#include <libhal-soft/inert_drivers/inert_accelerometer.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_temperature_sensor_test()
+namespace hal::soft {
+void inert_accelerometer_test()
 {
   using namespace boost::ut;
-  "inert_temperature_sensor"_test = []() {
+  "inert_accelerometer"_test = []() {
     // Setup
-    constexpr auto expected_temp = temperature_sensor::read_t{ 0.5f };
-    auto test = inert_temperature_sensor::create(expected_temp).value();
+    constexpr auto expected = accelerometer::read_t{ 0.1f, 0.2f, 0.3f };
+    auto test = inert_accelerometer::create(expected).value();
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(bool{ result });
-    expect(that % expected_temp.temperature == result.value().temperature);
+    expect(that % expected.x == result.value().x);
+    expect(that % expected.y == result.value().y);
+    expect(that % expected.z == result.value().z);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

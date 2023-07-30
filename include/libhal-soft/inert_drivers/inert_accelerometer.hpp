@@ -16,7 +16,7 @@
 
 #include <libhal/accelerometer.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of acceleration sensing hardware
  *
@@ -50,4 +50,4 @@ private:
 
   read_t m_values;
 };
-}  // namespace hal
+}  // namespace hal::soft

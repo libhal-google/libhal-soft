@@ -20,50 +20,39 @@ if(DEFINED ENABLE_ASAN)
   set(ASAN_FLAG "-fsanitize=address" CACHE INTERNAL "Use AddressSanatizer")
 endif(DEFINED ENABLE_ASAN)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  # require at least gcc 11
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
-    message(FATAL_ERROR "GCC version must be at least 11!")
-  endif()
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # require at least clang 14
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
-    message(FATAL_ERROR "Clang version must be at least 14!")
-  endif()
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-  # require at least clang 14
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
-    message(FATAL_ERROR "Clang version must be at least 14!")
-  endif()
-else()
-  message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC, detected ${CMAKE_CXX_COMPILER_ID}.")
-endif()
-
 find_package(ut REQUIRED CONFIG)
 find_package(libhal REQUIRED CONFIG)
 find_package(libhal-util REQUIRED CONFIG)
 find_package(libhal-mock REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME}
+
+  # Source
+  ../src/adc_mux.cpp
+  ../src/i2c_minimum_speed.cpp
+  ../src/rc_servo.cpp
+
+  # Tests
   adc_mux.test.cpp
   i2c_minimum_speed.test.cpp
   rc_servo.test.cpp
 
-  inert_accelerometer.test.cpp
-  inert_adc.test.cpp
-  inert_dac.test.cpp
-  inert_distance_sensor.test.cpp
-  inert_gyroscope.test.cpp
-  inert_input_pin.test.cpp
-  inert_interrupt_pin.test.cpp
-  inert_magnetometer.test.cpp
-  inert_motor.test.cpp
-  inert_pwm.test.cpp
-  inert_rotation_sensor.test.cpp
-  inert_steady_clock.test.cpp
-  inert_temperature_sensor.test.cpp
-  inert_timer.test.cpp
+  inert_drivers/inert_accelerometer.test.cpp
+  inert_drivers/inert_adc.test.cpp
+  inert_drivers/inert_dac.test.cpp
+  inert_drivers/inert_distance_sensor.test.cpp
+  inert_drivers/inert_gyroscope.test.cpp
+  inert_drivers/inert_input_pin.test.cpp
+  inert_drivers/inert_interrupt_pin.test.cpp
+  inert_drivers/inert_magnetometer.test.cpp
+  inert_drivers/inert_motor.test.cpp
+  inert_drivers/inert_pwm.test.cpp
+  inert_drivers/inert_rotation_sensor.test.cpp
+  inert_drivers/inert_steady_clock.test.cpp
+  inert_drivers/inert_temperature_sensor.test.cpp
+  inert_drivers/inert_timer.test.cpp
 
+  # Main
   main.test.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC . ../include ../src)
@@ -89,5 +78,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   boost-ext-ut::ut
   libhal::libhal
   libhal::util
-  libhal::mock
-  libhal-soft)
+  libhal::mock)

@@ -16,7 +16,7 @@
 
 #include <libhal/socket.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of generic network sockets
  *
@@ -58,4 +58,4 @@ private:
   write_t m_write_data;
   read_t m_read_data;
 };
-}  // namespace hal
+}  // namespace hal::soft

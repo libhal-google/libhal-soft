@@ -16,7 +16,7 @@
 
 #include <libhal/i2c.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of Inter-integrated Circuit (I2C) hardware
  *
@@ -53,4 +53,4 @@ private:
     return transaction_t{};
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

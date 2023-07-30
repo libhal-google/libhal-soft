@@ -16,7 +16,7 @@
 
 #include <libhal-util/map.hpp>
 
-namespace hal {
+namespace hal::soft {
 result<rc_servo> rc_servo::create(hal::pwm& p_pwm, settings p_settings)
 {
   // Check if any errors happened while setting the frequency of the pwm.
@@ -95,4 +95,4 @@ result<servo::position_t> rc_servo::driver_position(hal::degrees p_position)
   HAL_CHECK(m_pwm->duty_cycle(scaled_percent));
   return position_t{};
 }
-}  // namespace hal
+}  // namespace hal::soft

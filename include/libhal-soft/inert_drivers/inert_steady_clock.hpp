@@ -16,7 +16,7 @@
 
 #include <libhal/steady_clock.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of steady clock mechanism
  *
@@ -60,4 +60,4 @@ private:
   frequency_t m_frequency;
   uptime_t m_uptime;
 };
-}  // namespace hal
+}  // namespace hal::soft

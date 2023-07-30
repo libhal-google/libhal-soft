@@ -16,7 +16,7 @@
 
 #include <libhal/output_pin.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of digital output pin hardware
  *
@@ -60,4 +60,4 @@ private:
 
   bool m_level;
 };
-}  // namespace hal
+}  // namespace hal::soft

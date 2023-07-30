@@ -12,24 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_interrupt_pin.hpp>
+#include <libhal-soft/inert_drivers/inert_adc.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_interrupt_pin_test()
+namespace hal::soft {
+void inert_adc_test()
 {
   using namespace boost::ut;
-  "inert_interrupt_pin"_test = []() {
+  "inert_adc"_test = []() {
     // Setup
-    auto configure_settings = interrupt_pin::settings{};
-    auto test = inert_interrupt_pin::create().value();
+    constexpr auto expected = adc::read_t{ 0.5f };
+    auto test = inert_adc::create(expected).value();
 
     // Exercise
-    auto result = test.configure(configure_settings);
+    auto result = test.read();
 
     // Verify
     expect(bool{ result });
+    expect(that % expected.sample == result.value().sample);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

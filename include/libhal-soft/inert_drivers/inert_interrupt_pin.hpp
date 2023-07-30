@@ -16,7 +16,7 @@
 
 #include <libhal/interrupt_pin.hpp>
 
-namespace hal {
+namespace hal::soft {
 /**
  * @brief Inert implementation of digital interrupt pin hardware
  *
@@ -47,4 +47,4 @@ private:
 
   void driver_on_trigger([[maybe_unused]] hal::callback<handler> p_callback){};
 };
-}  // namespace hal
+}  // namespace hal::soft

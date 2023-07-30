@@ -19,14 +19,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
-
-[[nodiscard]] constexpr auto operator==(const i2c::settings& p_lhs,
-                                        const i2c::settings& p_rhs)
-{
-  return hal::equals(p_lhs.clock_rate, p_rhs.clock_rate);
-}
-
+namespace {
 struct fake_i2c : public hal::i2c
 {
   void reset()
@@ -35,20 +28,21 @@ struct fake_i2c : public hal::i2c
     spy_transaction.reset();
   }
   // Spy handler for hal::i2c::configure()
-  spy_handler<settings> spy_configure;
+  hal::spy_handler<settings> spy_configure;
   /// Record of the out data from hal::i2c::transaction()
-  spy_handler<hal::byte,
-              std::span<const hal::byte>,
-              std::span<hal::byte>,
-              std::function<hal::timeout_function>>
+  hal::spy_handler<hal::byte,
+                   std::span<const hal::byte>,
+                   std::span<hal::byte>,
+                   std::function<hal::timeout_function>>
     spy_transaction;
 
 private:
-  status driver_configure(const settings& p_settings)
+  hal::status driver_configure(const settings& p_settings)
   {
     return spy_configure.record(p_settings);
   }
-  result<transaction_t> driver_transaction(
+
+  hal::result<transaction_t> driver_transaction(
     [[maybe_unused]] hal::byte p_address,
     [[maybe_unused]] std::span<const hal::byte> p_data_out,
     [[maybe_unused]] std::span<hal::byte> p_data_in,
@@ -59,9 +53,15 @@ private:
     return transaction_t{};
   }
 };
-}  // namespace hal
+}  // namespace
 
-namespace hal {
+namespace hal::soft {
+[[nodiscard]] constexpr auto operator==(const i2c::settings& p_lhs,
+                                        const i2c::settings& p_rhs)
+{
+  return hal::equals(p_lhs.clock_rate, p_rhs.clock_rate);
+}
+
 void minimum_speed_test()
 {
   using namespace boost::ut;
@@ -69,7 +69,7 @@ void minimum_speed_test()
   "hal::i2c::minimum_speed_i2c"_test = []() {
     "create() with default frequency + configure()"_test = []() {
       // Setup
-      hal::fake_i2c mock_i2c;
+      fake_i2c mock_i2c;
       constexpr hal::i2c::settings minimum_default = {
         .clock_rate = minimum_speed_i2c::default_max_speed
       };
@@ -79,7 +79,7 @@ void minimum_speed_test()
       constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
 
       // Exercise
-      auto mock = hal::minimum_speed_i2c::create(mock_i2c).value();
+      auto mock = minimum_speed_i2c::create(mock_i2c).value();
 
       auto result1 = mock.configure(expected_upper_boundary);
       auto result2 = mock.configure(minimum_default);
@@ -97,7 +97,7 @@ void minimum_speed_test()
 
     "create() + configure() with frequency"_test = []() {
       // Setup
-      hal::fake_i2c mock_i2c;
+      fake_i2c mock_i2c;
       constexpr std::uint32_t device_frequency = 1'000'000;
       constexpr hal::i2c::settings choosen_frequency = { .clock_rate =
                                                            device_frequency };
@@ -107,8 +107,7 @@ void minimum_speed_test()
       constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
 
       // Exercise
-      auto mock =
-        hal::minimum_speed_i2c::create(mock_i2c, device_frequency).value();
+      auto mock = minimum_speed_i2c::create(mock_i2c, device_frequency).value();
 
       auto result1 = mock.configure(expected_upper_boundary);
       auto result2 = mock.configure(choosen_frequency);
@@ -136,8 +135,8 @@ void minimum_speed_test()
         has_been_called = true;
         return {};
       };
-      hal::fake_i2c mock_i2c;
-      auto mock = hal::minimum_speed_i2c::create(mock_i2c).value();
+      fake_i2c mock_i2c;
+      auto mock = minimum_speed_i2c::create(mock_i2c).value();
 
       // Exercise
       auto result1 =
@@ -161,4 +160,4 @@ void minimum_speed_test()
     };
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

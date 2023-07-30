@@ -12,26 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_accelerometer.hpp>
+#include <libhal-soft/inert_drivers/inert_interrupt_pin.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_accelerometer_test()
+namespace hal::soft {
+void inert_interrupt_pin_test()
 {
   using namespace boost::ut;
-  "inert_accelerometer"_test = []() {
+  "inert_interrupt_pin"_test = []() {
     // Setup
-    constexpr auto expected = accelerometer::read_t{ 0.1f, 0.2f, 0.3f };
-    auto test = inert_accelerometer::create(expected).value();
+    auto configure_settings = interrupt_pin::settings{};
+    auto test = inert_interrupt_pin::create().value();
 
     // Exercise
-    auto result = test.read();
+    auto result = test.configure(configure_settings);
 
     // Verify
-    expect(that % expected.x == result.value().x);
-    expect(that % expected.y == result.value().y);
-    expect(that % expected.z == result.value().z);
+    expect(bool{ result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

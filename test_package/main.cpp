@@ -17,8 +17,8 @@
 
 int main()
 {
-  auto pwm = hal::inert_pwm::create().value();
-  auto rc_servo = hal::rc_servo::create(pwm, {});
+  auto pwm = hal::soft::inert_pwm::create().value();
+  auto rc_servo = hal::soft::rc_servo::create(pwm, {});
 
   return 0;
 }

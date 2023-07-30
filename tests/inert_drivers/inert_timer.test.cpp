@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_timer_test()
 {
   using namespace boost::ut;
@@ -44,4 +44,4 @@ void inert_timer_test()
     expect(that % false == is_running_result2.value().is_running);
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

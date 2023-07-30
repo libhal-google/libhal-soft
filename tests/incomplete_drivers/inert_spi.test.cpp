@@ -16,7 +16,7 @@
 
 #include <boost/ut.hpp>
 
-namespace hal {
+namespace hal::soft {
 void inert_spi_test()
 {
   using namespace boost::ut;
@@ -37,4 +37,4 @@ void inert_spi_test()
     expect(bool{ transfer_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

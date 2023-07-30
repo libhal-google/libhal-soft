@@ -12,23 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <libhal-soft/inert_drivers/inert_dac.hpp>
+#include <libhal-soft/inert_drivers/inert_output_pin.hpp>
 
 #include <boost/ut.hpp>
 
-namespace hal {
-void inert_dac_test()
+namespace hal::soft {
+void inert_output_pin_test()
 {
   using namespace boost::ut;
-  "inert_dac"_test = []() {
+  "inert_output_pin"_test = []() {
     // Setup
-    auto test = inert_dac::create().value();
+    auto test = inert_output_pin::create().value();
 
     // Exercise
-    auto result = test.write(0.1f);
+    auto set_level_high_result = test.level(true);
+    auto get_level_high_result = test.level();
+    auto set_level_low_result = test.level(false);
+    auto get_level_low_result = test.level();
 
     // Verify
-    expect(bool{ result });
+    expect(bool{ set_level_high_result });
+    expect(bool{ get_level_high_result });
+    expect(bool{ set_level_low_result });
+    expect(bool{ get_level_low_result });
   };
 };
-}  // namespace hal
+}  // namespace hal::soft

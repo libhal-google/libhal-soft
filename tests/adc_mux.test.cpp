@@ -73,7 +73,7 @@ void adc_mux_test()
     // Setup
     adc_multiplexer test_mux =
       adc_multiplexer::create(signal_pins, source_adc, mock_timer);
-    adc_mux_pin test_adc_port_zero = hal::make::adc(test_mux, 0).value();
+    adc_mux_pin test_adc_port_zero = hal::make_adc(test_mux, 0).value();
     constexpr float expected_sample_zero = 0;
 
     // Exercise
@@ -88,8 +88,8 @@ void adc_mux_test()
     // Setup
     adc_multiplexer test_mux =
       adc_multiplexer::create(signal_pins, source_adc, mock_timer);
-    adc_mux_pin first_mux_pin = hal::make::adc(test_mux, 1).value();
-    adc_mux_pin second_mux_pin = hal::make::adc(test_mux, 2).value();
+    adc_mux_pin first_mux_pin = hal::make_adc(test_mux, 1).value();
+    adc_mux_pin second_mux_pin = hal::make_adc(test_mux, 2).value();
     constexpr float expected_sample_zero = 0;
     constexpr float expected_sample_three_halves = 1.5;
 
@@ -123,12 +123,12 @@ void adc_mux_test()
 
     // Exercise
     auto test_read_data = std::array<hal::result<hal::adc::read_t>, 4>{
-      hal::make::adc(test_mux, 0).value().read(),
-      hal::make::adc(test_mux, 1).value().read(),
-      hal::make::adc(test_mux, 2).value().read(),
-      hal::make::adc(test_mux, 3).value().read()
+      hal::make_adc(test_mux, 0).value().read(),
+      hal::make_adc(test_mux, 1).value().read(),
+      hal::make_adc(test_mux, 2).value().read(),
+      hal::make_adc(test_mux, 3).value().read()
     };
-    auto error_test = hal::make::adc(test_mux, 4).value().read();
+    auto error_test = hal::make_adc(test_mux, 4).value().read();
 
     // Verify
     for (auto& p : test_read_data) {

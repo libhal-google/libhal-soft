@@ -22,24 +22,6 @@
 #include <libhal/steady_clock.hpp>
 
 namespace hal::soft {
-class adc_multiplexer;
-class adc_mux_pin;
-}  // namespace hal::soft
-
-namespace hal::make {
-/**
- * @brief Returns an ADC pin from the multiplexer.
- *
- * @param p_multiplexer the adc multiplexer with the desire adc channel pin
- * @param p_channel The channel number of the pin
- * @return A newly constructed ADC multiplexer pin.
- * @throws std::errc::
- */
-result<hal::soft::adc_mux_pin> adc(hal::soft::adc_multiplexer& p_multiplexer,
-                                   std::uint8_t p_channel);
-}  // namespace hal::make
-
-namespace hal::soft {
 /**
  * @brief A driver for an ADC multiplexer that manages and reads ADC mux pins.
  * This driver is intended to be used with multiplexers that use digital
@@ -75,7 +57,7 @@ public:
 
   /**
    * @brief Gets the highest capacity channel held by the ADC mux object.
-   * This is caluclated based off of how many source pins are available.
+   * This is calculated based off of how many source pins are available.
    *
    * @return The maximum channel number for this mux (2^n states, where n is
    * number of source pins).
@@ -98,9 +80,8 @@ private:
  */
 class adc_mux_pin : public hal::adc
 {
-  friend hal::result<adc_mux_pin>(
-    ::hal::make::adc(hal::soft::adc_multiplexer& p_multiplexer,
-                     std::uint8_t p_channel));
+  friend hal::result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
+                                           std::uint8_t p_channel);
 
 private:
   adc_mux_pin(adc_multiplexer& p_mux, std::uint8_t p_mux_port);
@@ -109,4 +90,20 @@ private:
   adc_multiplexer* m_mux;
   std::uint8_t m_mux_port;
 };
+
+/**
+ * @brief Returns an ADC pin from the multiplexer.
+ *
+ * @param p_multiplexer the adc multiplexer with the desire adc channel pin
+ * @param p_channel The channel number of the pin
+ * @return A newly constructed ADC multiplexer pin.
+ * @throws std::errc::result_out_of_range if p_channel greater than the
+ * available number of channels in the multiplexer.
+ */
+result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
+                             std::uint8_t p_channel);
 }  // namespace hal::soft
+
+namespace hal {
+using hal::soft::make_adc;
+}  // namespace hal

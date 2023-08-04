@@ -68,15 +68,13 @@ hal::result<hal::adc::read_t> adc_mux_pin::driver_read()
 {
   return m_mux->read_channel(m_mux_port);
 }
-}  // namespace hal::soft
 
-namespace hal::make {
-result<hal::soft::adc_mux_pin> adc(hal::soft::adc_multiplexer& p_multiplexer,
-                                   std::uint8_t p_channel)
+result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
+                             std::uint8_t p_channel)
 {
   if (p_channel > p_multiplexer.get_max_channel()) {
     return hal::new_error(std::errc::result_out_of_range);
   }
-  return hal::soft::adc_mux_pin(p_multiplexer, p_channel);
+  return adc_mux_pin(p_multiplexer, p_channel);
 }
-}  // namespace hal::make
+}  // namespace hal::soft

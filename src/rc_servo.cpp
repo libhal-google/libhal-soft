@@ -31,12 +31,14 @@ result<rc_servo> rc_servo::create(hal::pwm& p_pwm, settings p_settings)
   // signal. The float is calculated by using the minimum width of the
   // signal in microseconds divided by the wavelength to get the decimal
   // representation of the float.
-  auto min_percent = float(p_settings.min_microseconds / wavelength);
+  auto min_percent =
+    static_cast<float>(p_settings.min_microseconds) / wavelength;
   // max_percent represents the maximum float to be used with the pwm
   // signal. The float is calculated by using the maximum width of the
   // signal in microseconds divided by the wavelength to get the decimal
   // representation of the float.
-  auto max_percent = float(p_settings.max_microseconds / wavelength);
+  auto max_percent =
+    static_cast<float>(p_settings.max_microseconds) / wavelength;
   // percent_range holds float value of min_percent and max_percent for use
   // with map function used in position().
   auto percent_range = std::make_pair(min_percent, max_percent);
@@ -45,16 +47,14 @@ result<rc_servo> rc_servo::create(hal::pwm& p_pwm, settings p_settings)
   auto angle_range = std::make_pair(static_cast<float>(p_settings.min_angle),
                                     static_cast<float>(p_settings.max_angle));
   // If no errors happen, call the constructor with verified parameters
-  return rc_servo(p_pwm, percent_range, angle_range);
+  return rc_servo(p_pwm,
+                  ranges{ .percent = percent_range, .angle = angle_range });
 }
 
 // Use an initializer list to initialize private members.
-constexpr rc_servo::rc_servo(hal::pwm& p_pwm,
-                             std::pair<float, float> p_percent_range,
-                             std::pair<float, float> p_angle_range)
+constexpr rc_servo::rc_servo(hal::pwm& p_pwm, ranges p_ranges)
   : m_pwm(&p_pwm)
-  , m_percent_range(p_percent_range)
-  , m_angle_range(p_angle_range)
+  , m_ranges(std::move(p_ranges))
 {
 }
 
@@ -65,12 +65,12 @@ result<servo::position_t> rc_servo::driver_position(hal::degrees p_position)
   // The angle of p_position should be within the min and max angles of the
   // servo. If the provided position is out of the provided range, an
   // invalid_argument error is thrown.
-  if (p_position < std::get<0>(m_angle_range) ||
-      p_position > std::get<1>(m_angle_range)) {
+  if (p_position < std::get<0>(m_ranges.angle) ||
+      p_position > std::get<1>(m_ranges.angle)) {
     return hal::new_error(std::errc::invalid_argument,
                           hal::servo::range_error{
-                            .min = std::get<0>(m_angle_range),
-                            .max = std::get<1>(m_angle_range),
+                            .min = std::get<0>(m_ranges.angle),
+                            .max = std::get<1>(m_ranges.angle),
                           });
   }
   // The range of p_position should be within the servo's angle range that was
@@ -89,7 +89,7 @@ result<servo::position_t> rc_servo::driver_position(hal::degrees p_position)
   // float(0.15) = position(float(90.0))
   // float(0.20) = position(float(135.0))
   // float(0.25) = position(float(180.0))
-  auto scaled_percent_raw = map(p_position, m_angle_range, m_percent_range);
+  auto scaled_percent_raw = map(p_position, m_ranges.angle, m_ranges.percent);
   auto scaled_percent = float(scaled_percent_raw);
   // Set the duty cycle of the pwm with the scaled percent.
   HAL_CHECK(m_pwm->duty_cycle(scaled_percent));

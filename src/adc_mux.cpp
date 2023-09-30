@@ -42,7 +42,7 @@ adc_multiplexer adc_multiplexer::create(
   hal::adc& p_source_pin,
   hal::steady_clock& p_clock)
 {
-  return adc_multiplexer(p_signal_pins, p_source_pin, p_clock);
+  return { p_signal_pins, p_source_pin, p_clock };
 }
 
 int adc_multiplexer::get_max_channel()

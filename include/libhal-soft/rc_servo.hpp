@@ -70,11 +70,14 @@ public:
   static result<rc_servo> create(hal::pwm& p_pwm, settings p_settings);
 
 private:
+  struct ranges
+  {
+    std::pair<float, float> percent;
+    std::pair<float, float> angle;
+  };
   // Constructor is private to only be accessed from the factory function.
   // Use p_ prefix for function parameters.
-  constexpr rc_servo(hal::pwm& p_pwm,
-                     std::pair<float, float> p_percent_range,
-                     std::pair<float, float> p_angle_range);
+  constexpr rc_servo(hal::pwm& p_pwm, ranges p_ranges);
 
   result<position_t> driver_position(hal::degrees p_position) override;
 
@@ -82,8 +85,7 @@ private:
   // Use a pointer here rather than a reference, because member references
   // implicitly delete move constructors
   hal::pwm* m_pwm;
-  std::pair<float, float> m_percent_range;
-  std::pair<float, float> m_angle_range;
+  ranges m_ranges;
 };
 // Comment the end of the namespace and end the file with an extra line.
 }  // namespace hal::soft

@@ -37,7 +37,7 @@ struct fake_i2c : public hal::i2c
     spy_transaction;
 
 private:
-  hal::status driver_configure(const settings& p_settings)
+  hal::status driver_configure(const settings& p_settings) final
   {
     return spy_configure.record(p_settings);
   }
@@ -46,7 +46,7 @@ private:
     [[maybe_unused]] hal::byte p_address,
     [[maybe_unused]] std::span<const hal::byte> p_data_out,
     [[maybe_unused]] std::span<hal::byte> p_data_in,
-    [[maybe_unused]] hal::function_ref<hal::timeout_function> p_timeout)
+    [[maybe_unused]] hal::function_ref<hal::timeout_function> p_timeout) final
   {
     HAL_CHECK(
       spy_transaction.record(p_address, p_data_out, p_data_in, p_timeout));

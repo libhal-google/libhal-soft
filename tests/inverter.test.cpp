@@ -14,6 +14,7 @@
 
 #include <libhal-soft/inverter.hpp>
 
+#include <libhal-mock/input_pin.hpp>
 #include <libhal-mock/output_pin.hpp>
 
 #include <boost/ut.hpp>
@@ -96,6 +97,70 @@ void output_pin_iverter_test()
       expect(bool{ level_result });
       expect(that % true == value_sent_to_level.state);
       expect(that % false == level_result.value().state);
+    };
+  };
+}
+
+void input_pin_iverter_test()
+{
+  using namespace boost::ut;
+
+  "hal::input_pin_inverter::configure"_test = []() {
+    "configure() with default settings"_test = []() {
+      // Setup
+      hal::mock::input_pin mock_input_pin;
+      hal::input_pin::settings expected_settings;
+      auto inverted_input_pin = input_pin_inverter(mock_input_pin);
+
+      // Exercise
+      auto result = inverted_input_pin.configure(expected_settings);
+      auto result_settings =
+        std::get<0>(mock_input_pin.spy_configure.call_history().at(0));
+
+      // Verify
+      expect(bool{ result });
+      expect(pin_resistor::pull_up == result_settings.resistor);
+    };
+
+    "configure() with set values for settings"_test = []() {
+      // Setup
+      hal::mock::input_pin mock_input_pin;
+      hal::input_pin::settings expected_settings;
+      expected_settings.resistor = pin_resistor::pull_down;
+      auto inverted_input_pin = input_pin_inverter(mock_input_pin);
+
+      // Exercise
+      auto result = inverted_input_pin.configure(expected_settings);
+      auto result_settings =
+        std::get<0>(mock_input_pin.spy_configure.call_history().at(0));
+
+      // Verify
+      expect(bool{ result });
+      expect(pin_resistor::pull_down == result_settings.resistor);
+    };
+  };
+
+  "hal::input_pin_inverter::level"_test = []() {
+    "level()"_test = []() {
+      // Setup
+      hal::mock::input_pin mock_input_pin;
+      auto inverted_input_pin = input_pin_inverter(mock_input_pin);
+      std::deque inputs{
+        input_pin::level_t{ .state = true },
+        input_pin::level_t{ .state = false },
+      };
+      std::queue queue(inputs);
+      mock_input_pin.set(queue);
+
+      // Exercise
+      auto result1 = inverted_input_pin.level();
+      auto result2 = inverted_input_pin.level();
+
+      // Verify
+      expect(bool{ result1 });
+      expect(bool{ result2 });
+      expect(that % false == result1.value().state);
+      expect(that % true == result2.value().state);
     };
   };
 }

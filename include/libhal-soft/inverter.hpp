@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include <libhal/input_pin.hpp>
 #include <libhal/output_pin.hpp>
 
 namespace hal::soft {
@@ -27,5 +28,17 @@ private:
   result<level_t> driver_level() override;
 
   hal::output_pin* m_output_pin;
+};
+
+class input_pin_inverter : public hal::input_pin
+{
+public:
+  input_pin_inverter(hal::input_pin& p_input_pin);
+
+private:
+  status driver_configure(const settings& p_settings) override;
+  result<level_t> driver_level() override;
+
+  hal::input_pin* m_input_pin;
 };
 }  // namespace hal::soft

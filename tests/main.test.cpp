@@ -16,6 +16,8 @@ namespace hal::soft {
 extern void adc_mux_test();
 extern void minimum_speed_test();
 extern void rc_servo_test();
+extern void output_pin_iverter_test();
+extern void input_pin_iverter_test();
 
 extern void inert_accelerometer_test();
 extern void inert_adc_test();
@@ -38,6 +40,8 @@ int main()
   hal::soft::adc_mux_test();
   hal::soft::minimum_speed_test();
   hal::soft::rc_servo_test();
+  hal::soft::output_pin_iverter_test();
+  hal::soft::input_pin_iverter_test();
 
   hal::soft::inert_accelerometer_test();
   hal::soft::inert_adc_test();

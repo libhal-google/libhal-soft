@@ -18,6 +18,7 @@ extern void minimum_speed_test();
 extern void rc_servo_test();
 extern void output_pin_iverter_test();
 extern void input_pin_iverter_test();
+extern void offset_servo_test();
 
 extern void inert_accelerometer_test();
 extern void inert_adc_test();
@@ -33,6 +34,7 @@ extern void inert_rotation_sensor_test();
 extern void inert_steady_clock_test();
 extern void inert_temperature_sensor_test();
 extern void inert_timer_test();
+extern void inert_servo_test();
 }  // namespace hal::soft
 
 int main()
@@ -42,6 +44,7 @@ int main()
   hal::soft::rc_servo_test();
   hal::soft::output_pin_iverter_test();
   hal::soft::input_pin_iverter_test();
+  hal::soft::offset_servo_test();
 
   hal::soft::inert_accelerometer_test();
   hal::soft::inert_adc_test();
@@ -57,4 +60,5 @@ int main()
   hal::soft::inert_steady_clock_test();
   hal::soft::inert_temperature_sensor_test();
   hal::soft::inert_timer_test();
+  hal::soft::inert_servo_test();
 }

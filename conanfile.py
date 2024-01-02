@@ -24,7 +24,7 @@ required_conan_version = ">=2.0.6"
 
 class libhal_soft_conan(ConanFile):
     name = "libhal-soft"
-    version = "3.0.2"
+    version = "3.1.0"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libhal.github.io/libhal-soft"
@@ -55,7 +55,7 @@ class libhal_soft_conan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.27.1")
         self.tool_requires("libhal-cmake-util/3.0.1")
-        self.test_requires("libhal-mock/[^2.0.0]")
+        self.test_requires("libhal-mock/[^2.1.0]")
         self.test_requires("boost-ext-ut/1.1.9")
 
     def requirements(self):

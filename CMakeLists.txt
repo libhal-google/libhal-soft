@@ -23,6 +23,7 @@ libhal_test_and_make_library(
   src/i2c_minimum_speed.cpp
   src/adc_mux.cpp
   src/inverter.cpp
+  src/offset_servo.cpp
 
   TEST_SOURCES
   tests/inert_drivers/inert_accelerometer.test.cpp
@@ -39,10 +40,12 @@ libhal_test_and_make_library(
   tests/inert_drivers/inert_steady_clock.test.cpp
   tests/inert_drivers/inert_temperature_sensor.test.cpp
   tests/inert_drivers/inert_timer.test.cpp
+  tests/inert_drivers/inert_servo.test.cpp
   tests/adc_mux.test.cpp
   tests/i2c_minimum_speed.test.cpp
   tests/inverter.test.cpp
   tests/rc_servo.test.cpp
+  tests/offset_servo.test.cpp
   tests/main.test.cpp
 
   PACKAGES

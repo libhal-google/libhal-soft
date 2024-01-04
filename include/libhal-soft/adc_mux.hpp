@@ -21,6 +21,11 @@
 #include <libhal/output_pin.hpp>
 #include <libhal/steady_clock.hpp>
 
+/**
+ * @defgroup AdcMux Adc Mux
+ *
+ */
+
 namespace hal::soft {
 /**
  * @brief A driver for an ADC multiplexer that manages and reads ADC mux pins.
@@ -76,6 +81,7 @@ private:
 };
 
 /**
+ * @ingroup AdcMux
  * @brief A class that represents a multiplexer pin for ADC.
  */
 class adc_mux_pin : public hal::adc
@@ -92,6 +98,7 @@ private:
 };
 
 /**
+ * @ingroup AdcMux
  * @brief Returns an ADC pin from the multiplexer.
  *
  * @param p_multiplexer the adc multiplexer with the desire adc channel pin

@@ -16,10 +16,26 @@
 #include <libhal/input_pin.hpp>
 #include <libhal/output_pin.hpp>
 
+/**
+ * @defgroup Inverter Inverter
+ *
+ */
+
 namespace hal::soft {
+/**
+ * @ingroup Inverter
+ * @brief An output_pin wrapper to get the negation of an output pin's state.
+ * For example, if the output pin is high, then this inverter is low.
+ *
+ */
 class output_pin_inverter : public hal::output_pin
 {
 public:
+  /**
+   * @brief Construct a new output_pin_inverter object from a source output_pin
+   *
+   * @param p_output_pin The output pin whose signal should be inverted.
+   */
   output_pin_inverter(hal::output_pin& p_output_pin);
 
 private:
@@ -30,9 +46,20 @@ private:
   hal::output_pin* m_output_pin;
 };
 
+/**
+ * @ingroup Inverter
+ * @brief An input_pin wrapper to get the negation of an input pin's state.
+ * For example, if the input pin is high, then this inverter is low.
+ *
+ */
 class input_pin_inverter : public hal::input_pin
 {
 public:
+  /**
+   * @brief Construct a new input_pin_inverter object from a source input_pin
+   *
+   * @param p_input_pin The output pin whose signal should be inverted.
+   */
   input_pin_inverter(hal::input_pin& p_input_pin);
 
 private:

@@ -25,39 +25,31 @@ class inert_steady_clock : public hal::steady_clock
 {
 public:
   /**
-   * @brief Factory function to create inert_steady_clock object
+   * @brief Create inert_steady_clock object
    *
-   * @param p_frequency - frequency_t object to return when frequency() is
-   * called
-   * @param p_uptime - uptime_t object with the starting value that will be
-   * returned when uptime() is called. The uptime will increment by 1 each time
-   * uptime() is called.
-   * @return result<inert_steady_clock> - Constructed inert_steady_clock object
+   * @param p_frequency - what will be returned from the frequency function.
+   * @param p_uptime - the starting value that will be returned when uptime() is
+   * called. The uptime will increment by 1 each time uptime() is called.
    */
-  static result<inert_steady_clock> create(frequency_t p_frequency,
-                                           uptime_t p_uptime)
-  {
-    return inert_steady_clock(p_frequency, p_uptime);
-  }
-
-private:
-  constexpr inert_steady_clock(frequency_t p_frequency, uptime_t p_uptime)
+  constexpr inert_steady_clock(hal::hertz p_frequency, std::uint64_t p_uptime)
     : m_frequency(p_frequency)
     , m_uptime(p_uptime)
   {
   }
-  frequency_t driver_frequency()
+
+private:
+  hal::hertz driver_frequency()
   {
     return m_frequency;
   };
 
-  uptime_t driver_uptime()
+  std::uint64_t driver_uptime()
   {
-    m_uptime.ticks++;
+    m_uptime++;
     return m_uptime;
   };
 
-  frequency_t m_frequency;
-  uptime_t m_uptime;
+  hal::hertz m_frequency;
+  std::uint64_t m_uptime;
 };
 }  // namespace hal::soft

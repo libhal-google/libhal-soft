@@ -24,24 +24,20 @@ void inert_timer_test()
     // Setup
     const hal::callback<void(void)> callback = []() {};
     const hal::time_duration delay = {};
-    auto is_running = timer::is_running_t{ true };
-    auto is_not_running = timer::is_running_t{ false };
-    auto test1 = inert_timer::create(is_running).value();
-    auto test2 = inert_timer::create(is_not_running).value();
+    auto is_running = true;
+    auto is_not_running = false;
+    inert_timer test1(is_running);
+    inert_timer test2(is_not_running);
 
     // Exercise
     auto is_running_result1 = test1.is_running();
     auto is_running_result2 = test2.is_running();
-    auto cancel_result = test1.cancel();
-    auto schedule_result = test1.schedule(callback, delay);
+    test1.cancel();
+    test1.schedule(callback, delay);
 
     // Verify
-    expect(bool{ is_running_result1 });
-    expect(bool{ is_running_result2 });
-    expect(bool{ cancel_result });
-    expect(bool{ schedule_result });
-    expect(that % true == is_running_result1.value().is_running);
-    expect(that % false == is_running_result2.value().is_running);
+    expect(that % true == is_running_result1);
+    expect(that % false == is_running_result2);
   };
 };
 }  // namespace hal::soft

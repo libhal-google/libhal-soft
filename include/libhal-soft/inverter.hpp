@@ -39,9 +39,9 @@ public:
   output_pin_inverter(hal::output_pin& p_output_pin);
 
 private:
-  status driver_configure(const settings& p_settings) override;
-  result<set_level_t> driver_level(bool p_high) override;
-  result<level_t> driver_level() override;
+  void driver_configure(const settings& p_settings) override;
+  void driver_level(bool p_high) override;
+  bool driver_level() override;
 
   hal::output_pin* m_output_pin;
 };
@@ -63,8 +63,8 @@ public:
   input_pin_inverter(hal::input_pin& p_input_pin);
 
 private:
-  status driver_configure(const settings& p_settings) override;
-  result<level_t> driver_level() override;
+  void driver_configure(const settings& p_settings) override;
+  bool driver_level() override;
 
   hal::input_pin* m_input_pin;
 };

@@ -16,6 +16,8 @@
 
 #include <libhal/adc.hpp>
 
+#include <algorithm>
+
 namespace hal::soft {
 /**
  * @brief Inert implementation of Analog to Digital Converter (ADC) hardware
@@ -25,27 +27,22 @@ class inert_adc : public hal::adc
 {
 public:
   /**
-   * @brief Factory function to create inert_adc object
+   * @brief Create inert_adc object
    *
-   * @param p_result - read_t object to return when reading the inert_adc
-   * @return result<inert_adc> - Constructed inert_adc object
+   * @param p_result - What will be returned from inert_adc's read function,
+   * clamped to -1.0f to 1.0f.
    */
-  static result<inert_adc> create(read_t p_result)
+  constexpr inert_adc(float p_result)
+    : m_result(std::clamp(p_result, -1.0f, 1.0f))
   {
-    return inert_adc(p_result);
   }
 
 private:
-  constexpr inert_adc(read_t p_result)
-    : m_result(p_result)
-  {
-  }
-
-  result<read_t> driver_read()
+  float driver_read()
   {
     return m_result;
   };
 
-  read_t m_result;
+  float m_result;
 };
 }  // namespace hal::soft

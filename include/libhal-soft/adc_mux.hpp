@@ -44,37 +44,32 @@ public:
    * @param p_source_pin The output adc pin of the multiplexer.
    * @param p_clock A steady clock used for delaying 500ns to give time to the
    * mux to have an updated signal.
-   * @return The constructed adc_multiplexer.
    */
-  static adc_multiplexer create(std::span<hal::output_pin*> p_signal_pins,
-                                hal::adc& p_source_pin,
-                                hal::steady_clock& p_clock);
+  adc_multiplexer(std::span<output_pin*> p_signal_pins,
+                  hal::adc& p_source_pin,
+                  hal::steady_clock& p_clock);
 
   /**
    * @brief Reads a channel on the mux.
    *
    * @param p_mux_port The port to be read. If an out of bounds port number is
    * passed, an error-typed result is returned.
-   * @return The hal::adc::read_t struct of the read value or an error if an
-   * invalid port is given.
+   * @return float - adc sample from the selected channel.
    */
-  hal::result<hal::adc::read_t> read_channel(std::uint16_t p_mux_port);
+  float read_channel(std::uint16_t p_mux_port);
 
   /**
    * @brief Gets the highest capacity channel held by the ADC mux object.
    * This is calculated based off of how many source pins are available.
    *
-   * @return The maximum channel number for this mux (2^n states, where n is
+   * @return the maximum channel number for this mux (2^n states, where n is
    * number of source pins).
    */
   int get_max_channel();
 
 private:
-  adc_multiplexer(std::span<output_pin*> p_signal_pins,
-                  hal::adc& p_source_pin,
-                  hal::steady_clock& p_clock);
+  void set_mux_channel(std::uint16_t p_position);
 
-private:
   std::span<output_pin*> m_signal_pins;
   hal::adc* m_source_pin;
   hal::steady_clock* m_clock;
@@ -86,12 +81,11 @@ private:
  */
 class adc_mux_pin : public hal::adc
 {
-  friend hal::result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
-                                           std::uint8_t p_channel);
+public:
+  adc_mux_pin(adc_multiplexer& p_mux, std::uint8_t p_mux_port);
 
 private:
-  adc_mux_pin(adc_multiplexer& p_mux, std::uint8_t p_mux_port);
-  hal::result<read_t> driver_read() override;
+  float driver_read() override;
 
   adc_multiplexer* m_mux;
   std::uint8_t m_mux_port;
@@ -107,8 +101,7 @@ private:
  * @throws std::errc::result_out_of_range if p_channel greater than the
  * available number of channels in the multiplexer.
  */
-result<adc_mux_pin> make_adc(adc_multiplexer& p_multiplexer,
-                             std::uint8_t p_channel);
+adc_mux_pin make_adc(adc_multiplexer& p_multiplexer, std::uint8_t p_channel);
 }  // namespace hal::soft
 
 namespace hal {

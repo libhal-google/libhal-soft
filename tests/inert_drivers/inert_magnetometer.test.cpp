@@ -23,16 +23,15 @@ void inert_magnetometer_test()
   "inert_magnetometer"_test = []() {
     // Setup
     constexpr auto expected_read = magnetometer::read_t{ 0.1f, 0.2f, 0.3f };
-    auto test = inert_magnetometer::create(expected_read).value();
+    inert_magnetometer test(expected_read);
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(bool{ result });
-    expect(that % expected_read.x == result.value().x);
-    expect(that % expected_read.y == result.value().y);
-    expect(that % expected_read.z == result.value().z);
+    expect(that % expected_read.x == result.x);
+    expect(that % expected_read.y == result.y);
+    expect(that % expected_read.z == result.z);
   };
 };
 }  // namespace hal::soft

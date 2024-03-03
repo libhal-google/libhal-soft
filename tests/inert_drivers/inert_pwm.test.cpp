@@ -22,15 +22,12 @@ void inert_pwm_test()
   using namespace boost::ut;
   "inert_pwm"_test = []() {
     // Setup
-    auto test = inert_pwm::create().value();
+    inert_pwm test;
 
     // Exercise
-    auto frequency_result = test.frequency(0.1f);
-    auto duty_cycle_result = test.duty_cycle(0.1f);
-
     // Verify
-    expect(bool{ frequency_result });
-    expect(bool{ duty_cycle_result });
+    test.frequency(0.1f);
+    test.duty_cycle(0.1f);
   };
 };
 }  // namespace hal::soft

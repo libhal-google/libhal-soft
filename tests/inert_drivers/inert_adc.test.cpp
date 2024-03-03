@@ -22,15 +22,14 @@ void inert_adc_test()
   using namespace boost::ut;
   "inert_adc"_test = []() {
     // Setup
-    constexpr auto expected = adc::read_t{ 0.5f };
-    auto test = inert_adc::create(expected).value();
+    constexpr auto expected = 0.5f;
+    inert_adc test(expected);
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(bool{ result });
-    expect(that % expected.sample == result.value().sample);
+    expect(that % expected == result);
   };
 };
 }  // namespace hal::soft

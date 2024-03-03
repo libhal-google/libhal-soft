@@ -17,13 +17,14 @@
 #include <libhal-util/map.hpp>
 
 namespace hal::soft {
-result<rc_servo> rc_servo::create(hal::pwm& p_pwm, settings p_settings)
+rc_servo::rc_servo(hal::pwm& p_pwm, settings p_settings)
+  : m_pwm(&p_pwm)
 {
   // Check if any errors happened while setting the frequency of the pwm.
   // Using HAL_CHECK will return any errors that occur from the factory
   // function allowing the caller to choose what to do with the error
   // information.
-  HAL_CHECK(p_pwm.frequency(p_settings.frequency));
+  p_pwm.frequency(p_settings.frequency);
 
   // Calculate the wavelength in microseconds.
   auto wavelength = (1.0f / p_settings.frequency) * std::micro::den;
@@ -47,36 +48,23 @@ result<rc_servo> rc_servo::create(hal::pwm& p_pwm, settings p_settings)
   auto angle_range = std::make_pair(static_cast<float>(p_settings.min_angle),
                                     static_cast<float>(p_settings.max_angle));
   // If no errors happen, call the constructor with verified parameters
-  return rc_servo(p_pwm,
-                  ranges{ .percent = percent_range, .angle = angle_range });
+  m_ranges = ranges{ .percent = percent_range, .angle = angle_range };
 }
 
-// Use an initializer list to initialize private members.
-constexpr rc_servo::rc_servo(hal::pwm& p_pwm, ranges p_ranges)
-  : m_pwm(&p_pwm)
-  , m_ranges(std::move(p_ranges))
+// Drivers must implement functions that are listed in interface.
+void rc_servo::driver_position(hal::degrees p_position)
 {
-}
-
-// Drivers must implement functions that are listed in interface. Use override
-// keyword for virtual functions
-result<servo::position_t> rc_servo::driver_position(hal::degrees p_position)
-{
-  // The angle of p_position should be within the min and max angles of the
-  // servo. If the provided position is out of the provided range, an
-  // invalid_argument error is thrown.
+  // The angle of p_position should be within the min and max
+  // angles of the servo. If the provided position is out of the
+  // provided range, an invalid_argument error is thrown.
   if (p_position < std::get<0>(m_ranges.angle) ||
       p_position > std::get<1>(m_ranges.angle)) {
-    return hal::new_error(std::errc::invalid_argument,
-                          hal::servo::range_error{
-                            .min = std::get<0>(m_ranges.angle),
-                            .max = std::get<1>(m_ranges.angle),
-                          });
+    hal::safe_throw(hal::argument_out_of_domain(this));
   }
-  // The range of p_position should be within the servo's angle range that was
-  // defined during creation. The value of p_position is mapped within the
-  // float range of the pwm signal to get the decimal value of the
-  // scaled_float.
+  // The range of p_position should be within the servo's angle
+  // range that was defined during creation. The value of
+  // p_position is mapped within the float range of the pwm
+  // signal to get the decimal value of the scaled_float.
   //
   // Example:
   // pwm min float: float(0.05)
@@ -92,7 +80,6 @@ result<servo::position_t> rc_servo::driver_position(hal::degrees p_position)
   auto scaled_percent_raw = map(p_position, m_ranges.angle, m_ranges.percent);
   auto scaled_percent = float(scaled_percent_raw);
   // Set the duty cycle of the pwm with the scaled percent.
-  HAL_CHECK(m_pwm->duty_cycle(scaled_percent));
-  return position_t{};
+  m_pwm->duty_cycle(scaled_percent);
 }
 }  // namespace hal::soft

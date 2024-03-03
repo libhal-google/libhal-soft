@@ -26,7 +26,7 @@ void inert_spi_test()
     std::array<hal::byte, 4> data_in{ '1', '2' };
     const auto data_filler = ' ';
     constexpr auto configure_settings = spi::settings{};
-    auto test = inert_spi::create().value();
+    auto test = inert_spi::create();
 
     // Exercise
     auto configure_result = test.configure(configure_settings);

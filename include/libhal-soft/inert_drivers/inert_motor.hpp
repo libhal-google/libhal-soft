@@ -25,23 +25,14 @@ class inert_motor : public hal::motor
 {
 public:
   /**
-   * @brief Factory function to create inert_motor object
+   * @brief Create inert_motor object
    *
-   * @return result<inert_motor> - Constructed inert_motor object
    */
-  static result<inert_motor> create()
-  {
-    return inert_motor();
-  }
-
-private:
   constexpr inert_motor()
   {
   }
 
-  result<power_t> driver_power([[maybe_unused]] float p_power)
-  {
-    return power_t{};
-  };
+private:
+  void driver_power([[maybe_unused]] float p_power){};
 };
 }  // namespace hal::soft

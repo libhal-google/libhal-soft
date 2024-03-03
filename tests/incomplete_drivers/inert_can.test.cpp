@@ -26,8 +26,8 @@ void inert_can_test()
       .baud_rate = 1.0_Hz,
     };
     constexpr hal::can::message_t message{ .id = 1, .length = 0 };
-    auto test = inert_can::create(true).value();
-    auto test2 = inert_can::create(false).value();
+    auto test = inert_can::create(true);
+    auto test2 = inert_can::create(false);
 
     // Exercise
     auto configure_result = test.configure(settings);

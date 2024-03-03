@@ -29,12 +29,6 @@ void adc_mux_test()
 {
   // Setup for all tests
   using namespace boost::ut;
-  using namespace hal::literals;
-  using namespace std::chrono_literals;
-
-  using level_t = hal::output_pin::level_t;
-  using read_t = hal::adc::read_t;
-  using uptime_t = hal::steady_clock::uptime_t;
 
   // configure virtual testing pins
   constexpr int num_pins = 2;
@@ -42,26 +36,18 @@ void adc_mux_test()
   auto mock_pin1 = mock::output_pin();
   std::array<hal::output_pin*, num_pins> signal_pins = { &mock_pin0,
                                                          &mock_pin1 };
-  for (auto& s : signal_pins) {
-    s->level() = level_t{ .state = false };
-  }
-
   mock::adc source_adc = mock::adc();
   auto mock_timer = mock::steady_clock();
-  auto update_queue = std::queue<uptime_t>();
+  auto update_queue = std::queue<std::uint64_t>();
 
   // Simulate clock ticks for mock::steady_clock
   for (std::uint64_t i = 0; i < 100; i++) {
-    update_queue.push(uptime_t{ .ticks = i });
+    update_queue.push(i);
   }
   mock_timer.set_uptimes(update_queue);
-  mock_timer.set_frequency(steady_clock::frequency_t{
-    .operating_frequency = static_cast<hertz>(1 * std::kilo::num) });
-  auto adc_sample_pool = std::array<read_t, 4>{ read_t{ .sample = 0 },
-                                                read_t{ .sample = 1.5 },
-                                                read_t{ .sample = 2 },
-                                                read_t{ .sample = 2.5 } };
-  auto sample_queue = std::queue<read_t>();
+  mock_timer.set_frequency(static_cast<hertz>(1 * std::kilo::num));
+  auto adc_sample_pool = std::array<float, 4>{ 0, 1.5, 2, 2.5 };
+  auto sample_queue = std::queue<float>();
   for (auto& s : adc_sample_pool) {
     sample_queue.push(s);
   }
@@ -71,13 +57,12 @@ void adc_mux_test()
 
   "adc_mux"_test = [signal_pins, source_adc, mock_timer]() mutable {
     // Setup
-    adc_multiplexer test_mux =
-      adc_multiplexer::create(signal_pins, source_adc, mock_timer);
-    adc_mux_pin test_adc_port_zero = hal::make_adc(test_mux, 0).value();
+    adc_multiplexer test_mux(signal_pins, source_adc, mock_timer);
+    adc_mux_pin test_adc_port_zero = hal::make_adc(test_mux, 0);
     constexpr float expected_sample_zero = 0;
 
     // Exercise
-    auto test_sample = test_adc_port_zero.read().value().sample;
+    auto test_sample = test_adc_port_zero.read();
 
     // Verify
     expect(that % expected_sample_zero == test_sample);
@@ -86,22 +71,19 @@ void adc_mux_test()
   // simulate reading from another pin
   "adc_mux_pin_switch"_test = [signal_pins, source_adc, mock_timer]() mutable {
     // Setup
-    adc_multiplexer test_mux =
-      adc_multiplexer::create(signal_pins, source_adc, mock_timer);
-    adc_mux_pin first_mux_pin = hal::make_adc(test_mux, 1).value();
-    adc_mux_pin second_mux_pin = hal::make_adc(test_mux, 2).value();
+    adc_multiplexer test_mux(signal_pins, source_adc, mock_timer);
+    adc_mux_pin first_mux_pin = hal::make_adc(test_mux, 1);
+    adc_mux_pin second_mux_pin = hal::make_adc(test_mux, 2);
     constexpr float expected_sample_zero = 0;
     constexpr float expected_sample_three_halves = 1.5;
 
     // Exercise
-    auto first_test_value = first_mux_pin.read().value().sample;
+    auto first_test_value = first_mux_pin.read();
     auto first_signal_state =
-      std::pair<bool, bool>{ signal_pins[0]->level().value().state,
-                             signal_pins[1]->level().value().state };
-    auto second_test_value = second_mux_pin.read().value().sample;
+      std::pair<bool, bool>{ signal_pins[0]->level(), signal_pins[1]->level() };
+    auto second_test_value = second_mux_pin.read();
     auto second_signal_state =
-      std::pair<bool, bool>{ signal_pins[0]->level().value().state,
-                             signal_pins[1]->level().value().state };
+      std::pair<bool, bool>{ signal_pins[0]->level(), signal_pins[1]->level() };
 
     // Verify
 
@@ -118,23 +100,13 @@ void adc_mux_test()
 
   "adc_mux_error"_test = [signal_pins, source_adc, mock_timer]() mutable {
     // Setup
-    adc_multiplexer test_mux =
-      adc_multiplexer::create(signal_pins, source_adc, mock_timer);
+    adc_multiplexer test_mux(signal_pins, source_adc, mock_timer);
 
     // Exercise
-    auto test_read_data = std::array<hal::result<hal::adc::read_t>, 4>{
-      hal::make_adc(test_mux, 0).value().read(),
-      hal::make_adc(test_mux, 1).value().read(),
-      hal::make_adc(test_mux, 2).value().read(),
-      hal::make_adc(test_mux, 3).value().read()
-    };
-    auto error_test = hal::make_adc(test_mux, 4).value().read();
-
     // Verify
-    for (auto& p : test_read_data) {
-      expect(that % true == p.has_value());
-    }
-    expect(that % true == error_test.has_error());
+    [[maybe_unused]] auto f = throws<hal::argument_out_of_domain>([&]() {
+      [[maybe_unused]] auto adc_pin = hal::make_adc(test_mux, 3).read();
+    });
   };
 };
 

@@ -26,7 +26,7 @@ void inert_serial_test()
     constexpr auto write_data = serial::write_t{};
     constexpr auto read_data = serial::read_t{};
     constexpr auto configure_settings = serial::settings{};
-    auto test = inert_serial::create(write_data, read_data).value();
+    auto test = inert_serial::create(write_data, read_data);
 
     // Exercise
     auto configure_result = test.configure(configure_settings);

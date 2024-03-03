@@ -22,13 +22,11 @@ void inert_motor_test()
   using namespace boost::ut;
   "inert_motor"_test = []() {
     // Setup
-    auto test = inert_motor::create().value();
+    inert_motor test;
 
     // Exercise
-    auto result = test.power(0.1f);
-
     // Verify
-    expect(bool{ result });
+    test.power(0.1f);
   };
 };
 }  // namespace hal::soft

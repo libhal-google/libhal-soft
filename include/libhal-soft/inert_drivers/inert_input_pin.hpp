@@ -25,32 +25,22 @@ class inert_input_pin : public hal::input_pin
 {
 public:
   /**
-   * @brief Factory function to create inert_input_pin object
+   * @brief Create inert_input_pin object
    *
-   * @param p_level - level_t object to retrun when level() is called
-   * @return result<inert_input_pin> - Constructed inert_input_pin object
+   * @param p_level - what will be returned from the level function.
    */
-  static result<inert_input_pin> create(level_t p_level)
-  {
-    return inert_input_pin(p_level);
-  }
-
-private:
-  constexpr inert_input_pin(level_t p_level)
+  constexpr inert_input_pin(bool p_level)
     : m_level(p_level)
   {
   }
 
-  status driver_configure([[maybe_unused]] const settings& p_settings)
-  {
-    return hal::success();
-  };
-
-  result<level_t> driver_level()
+private:
+  void driver_configure([[maybe_unused]] const settings& p_settings){};
+  bool driver_level()
   {
     return m_level;
   };
 
-  level_t m_level;
+  bool m_level;
 };
 }  // namespace hal::soft

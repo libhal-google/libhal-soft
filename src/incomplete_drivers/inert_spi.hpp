@@ -26,7 +26,7 @@ class inert_spi : public hal::spi
 {
 public:
   /**
-   * @brief Factory function to create inert_spi object
+   * @brief Create inert_spi object
    *
    * @return result<inert_spi> - Constructed inert_spi object
    */

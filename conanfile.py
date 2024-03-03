@@ -19,12 +19,11 @@ from conan.tools.build import check_min_cppstd
 import os
 
 
-required_conan_version = ">=2.0.6"
+required_conan_version = ">=2.0.14"
 
 
 class libhal_soft_conan(ConanFile):
     name = "libhal-soft"
-    version = "3.0.2"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libhal.github.io/libhal-soft"
@@ -55,12 +54,12 @@ class libhal_soft_conan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/3.27.1")
         self.tool_requires("libhal-cmake-util/3.0.1")
-        self.test_requires("libhal-mock/[^2.0.0]")
+        self.test_requires("libhal-mock/[^3.0.0]")
         self.test_requires("boost-ext-ut/1.1.9")
 
     def requirements(self):
-        self.requires("libhal/[^2.0.3]", transitive_headers=True)
-        self.requires("libhal-util/[^3.0.1]")
+        self.requires("libhal/[^3.0.0]", transitive_headers=True)
+        self.requires("libhal-util/[^4.0.0]")
 
     def layout(self):
         cmake_layout(self)

@@ -31,23 +31,23 @@ void rc_servo_test()
     hal::mock::pwm pwm2;
 
     // Exercise
+    // Verify
+
     // use defaults
-    auto servo0 = rc_servo::create(pwm0, {});
+    [[maybe_unused]] rc_servo servo0(pwm0, {});
     // 100Hz (or 10ms per update) with 500us being max negative start and 2500us
     // being max positive.
-    auto servo1 = rc_servo::create(pwm1,
-                                   {
-                                     .frequency = 100,
-                                     .min_microseconds = 500,
-                                     .max_microseconds = 2500,
-                                   });
-    pwm2.spy_frequency.trigger_error_on_call(1);
-    auto servo2 = rc_servo::create(pwm2, {});
+    [[maybe_unused]] rc_servo servo1(pwm1,
+                                     {
+                                       .frequency = 100,
+                                       .min_microseconds = 500,
+                                       .max_microseconds = 2500,
+                                     });
 
-    // Verify
-    expect(bool{ servo0 });
-    expect(bool{ servo1 });
-    expect(!servo2);
+    pwm2.spy_frequency.trigger_error_on_call(
+      1, []() { hal::safe_throw(hal::operation_not_supported(nullptr)); });
+
+    [[maybe_unused]] auto f = throws([&]() { rc_servo servo2(pwm2, {}); });
   };
 
   "hal::servo::rc_servo::position"_test = []() {
@@ -65,30 +65,23 @@ void rc_servo_test()
     constexpr auto angle4 = hal::degrees(180);
 
     hal::mock::pwm pwm;
-    auto servo = rc_servo::create(pwm,
-                                  {
-                                    .frequency = 100,
-                                    .min_angle = 0,
-                                    .max_angle = 180,
-                                    .min_microseconds = 500,
-                                    .max_microseconds = 2500,
-                                  })
-                   .value();
+    rc_servo servo(pwm,
+                   {
+                     .frequency = 100,
+                     .min_angle = 0,
+                     .max_angle = 180,
+                     .min_microseconds = 500,
+                     .max_microseconds = 2500,
+                   });
 
     // Exercise
-    auto result0 = servo.position(angle0);
-    auto result1 = servo.position(angle1);
-    auto result2 = servo.position(angle2);
-    auto result3 = servo.position(angle3);
-    auto result4 = servo.position(angle4);
+    servo.position(angle0);
+    servo.position(angle1);
+    servo.position(angle2);
+    servo.position(angle3);
+    servo.position(angle4);
 
     // Verify
-    expect(bool{ result0 });
-    expect(bool{ result1 });
-    expect(bool{ result2 });
-    expect(bool{ result3 });
-    expect(bool{ result4 });
-
     expect(that % expected0 ==
            std::get<0>(pwm.spy_duty_cycle.call_history().at(0)));
     expect(that % expected1 ==
@@ -116,30 +109,23 @@ void rc_servo_test()
     constexpr auto angle4 = hal::degrees(90);
 
     hal::mock::pwm pwm;
-    auto servo = rc_servo::create(pwm,
-                                  {
-                                    .frequency = 100,
-                                    .min_angle = -90,
-                                    .max_angle = 90,
-                                    .min_microseconds = 500,
-                                    .max_microseconds = 2500,
-                                  })
-                   .value();
+    rc_servo servo(pwm,
+                   {
+                     .frequency = 100,
+                     .min_angle = -90,
+                     .max_angle = 90,
+                     .min_microseconds = 500,
+                     .max_microseconds = 2500,
+                   });
 
     // Exercise
-    auto result0 = servo.position(angle0);
-    auto result1 = servo.position(angle1);
-    auto result2 = servo.position(angle2);
-    auto result3 = servo.position(angle3);
-    auto result4 = servo.position(angle4);
+    servo.position(angle0);
+    servo.position(angle1);
+    servo.position(angle2);
+    servo.position(angle3);
+    servo.position(angle4);
 
     // Verify
-    expect(bool{ result0 });
-    expect(bool{ result1 });
-    expect(bool{ result2 });
-    expect(bool{ result3 });
-    expect(bool{ result4 });
-
     expect(that % expected0 ==
            std::get<0>(pwm.spy_duty_cycle.call_history().at(0)));
     expect(that % expected1 ==
@@ -157,28 +143,19 @@ void rc_servo_test()
     hal::mock::pwm pwm;
     constexpr hal::degrees min_angle = 0.0f;
     constexpr hal::degrees max_angle = 90.0f;
-    auto test = rc_servo::create(pwm,
-                                 {
-                                   .frequency = 100,
-                                   .min_microseconds = 500,
-                                   .max_microseconds = 2500,
-                                 })
-                  .value();
+    rc_servo test(pwm,
+                  {
+                    .frequency = 100,
+                    .min_angle = min_angle,
+                    .max_angle = max_angle,
+                    .min_microseconds = 500,
+                    .max_microseconds = 2500,
+                  });
 
     // Exercise
-    hal::attempt_all(
-      [&test]() -> hal::status {
-        HAL_CHECK(test.position(max_angle + 45.0f));
-        return hal::new_error();
-      },
-      // Verify
-      [min_angle, max_angle](std::errc p_error_code,
-                             hal::servo::range_error p_range_error) {
-        expect(std::errc::invalid_argument == p_error_code);
-        expect(that % min_angle == p_range_error.min);
-        expect(that % max_angle == p_range_error.max);
-      },
-      []() { expect(false) << "None of the above errors were thrown!"; });
+    // Verify
+    [[maybe_unused]] auto f = throws<hal::argument_out_of_domain>(
+      [&]() { test.position(max_angle + 45.0f); });
   };
 };
 }  // namespace hal::soft

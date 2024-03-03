@@ -32,12 +32,11 @@ void output_pin_iverter_test()
       auto inverted_output_pin = output_pin_inverter(mock_output_pin);
 
       // Exercise
-      auto result = inverted_output_pin.configure(expected_settings);
+      inverted_output_pin.configure(expected_settings);
       auto result_settings =
         std::get<0>(mock_output_pin.spy_configure.call_history().at(0));
 
       // Verify
-      expect(bool{ result });
       expect(false == result_settings.open_drain);
       expect(pin_resistor::none == result_settings.resistor);
     };
@@ -51,12 +50,11 @@ void output_pin_iverter_test()
       auto inverted_output_pin = output_pin_inverter(mock_output_pin);
 
       // Exercise
-      auto result = inverted_output_pin.configure(expected_settings);
+      inverted_output_pin.configure(expected_settings);
       auto result_settings =
         std::get<0>(mock_output_pin.spy_configure.call_history().at(0));
 
       // Verify
-      expect(bool{ result });
       expect(true == result_settings.open_drain);
       expect(pin_resistor::pull_down == result_settings.resistor);
     };
@@ -69,16 +67,14 @@ void output_pin_iverter_test()
       auto inverted_output_pin = output_pin_inverter(mock_output_pin);
 
       // Exercise
-      auto result = inverted_output_pin.level(true);
+      inverted_output_pin.level(true);
       auto value_sent_to_level =
         std::get<0>(mock_output_pin.spy_level.call_history().at(0));
       auto level_result = inverted_output_pin.level();
 
       // Verify
-      expect(bool{ result });
-      expect(bool{ level_result });
-      expect(that % false == value_sent_to_level.state);
-      expect(that % true == level_result.value().state);
+      expect(that % false == value_sent_to_level);
+      expect(that % true == level_result);
     };
 
     "level(false)"_test = []() {
@@ -87,16 +83,14 @@ void output_pin_iverter_test()
       auto inverted_output_pin = output_pin_inverter(mock_output_pin);
 
       // Exercise
-      auto result = inverted_output_pin.level(false);
+      inverted_output_pin.level(false);
       auto value_sent_to_level =
         std::get<0>(mock_output_pin.spy_level.call_history().at(0));
       auto level_result = inverted_output_pin.level();
 
       // Verify
-      expect(bool{ result });
-      expect(bool{ level_result });
-      expect(that % true == value_sent_to_level.state);
-      expect(that % false == level_result.value().state);
+      expect(that % true == value_sent_to_level);
+      expect(that % false == level_result);
     };
   };
 }
@@ -113,12 +107,11 @@ void input_pin_iverter_test()
       auto inverted_input_pin = input_pin_inverter(mock_input_pin);
 
       // Exercise
-      auto result = inverted_input_pin.configure(expected_settings);
+      inverted_input_pin.configure(expected_settings);
       auto result_settings =
         std::get<0>(mock_input_pin.spy_configure.call_history().at(0));
 
       // Verify
-      expect(bool{ result });
       expect(pin_resistor::pull_up == result_settings.resistor);
     };
 
@@ -130,12 +123,11 @@ void input_pin_iverter_test()
       auto inverted_input_pin = input_pin_inverter(mock_input_pin);
 
       // Exercise
-      auto result = inverted_input_pin.configure(expected_settings);
+      inverted_input_pin.configure(expected_settings);
       auto result_settings =
         std::get<0>(mock_input_pin.spy_configure.call_history().at(0));
 
       // Verify
-      expect(bool{ result });
       expect(pin_resistor::pull_down == result_settings.resistor);
     };
   };
@@ -145,10 +137,7 @@ void input_pin_iverter_test()
       // Setup
       hal::mock::input_pin mock_input_pin;
       auto inverted_input_pin = input_pin_inverter(mock_input_pin);
-      std::deque inputs{
-        input_pin::level_t{ .state = true },
-        input_pin::level_t{ .state = false },
-      };
+      std::deque inputs{ true, false };
       std::queue queue(inputs);
       mock_input_pin.set(queue);
 
@@ -157,10 +146,8 @@ void input_pin_iverter_test()
       auto result2 = inverted_input_pin.level();
 
       // Verify
-      expect(bool{ result1 });
-      expect(bool{ result2 });
-      expect(that % false == result1.value().state);
-      expect(that % true == result2.value().state);
+      expect(that % false == result1);
+      expect(that % true == result2);
     };
   };
 }

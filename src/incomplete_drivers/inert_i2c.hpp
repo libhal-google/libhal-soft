@@ -25,7 +25,7 @@ class inert_i2c : public hal::i2c
 {
 public:
   /**
-   * @brief Factory function to create inert_i2c object
+   * @brief Create inert_i2c object
    *
    * @return result<inert_i2c> - Constructed inert_i2c object
    */

@@ -26,23 +26,23 @@ class minimum_speed_i2c : public hal::i2c
 public:
   constexpr static auto default_max_speed = 2'000'000;
   /**
-   * @brief Factory function to create minimum_speed_i2c object.
+   * @brief Create minimum_speed_i2c object.
    *
    * @param p_i2c - i2c object that the device will use
    * @param p_frequency - the maximum starting frequency the device can use
-   * @return minimum_speed_i2c - the configured i2c object using the lowest seen
-   * frequency
    */
-  static result<minimum_speed_i2c> create(
-    hal::i2c& p_i2c,
-    hertz p_frequency = default_max_speed);
+  minimum_speed_i2c(hal::i2c& p_i2c, hertz p_frequency = default_max_speed);
 
 private:
-  minimum_speed_i2c(hal::i2c& p_i2c, hertz p_frequency);
+  /**
+   * @brief Pass through configuration function from this class to the passed
+   * i2c driver.
+   *
+   * @param p_new_setting - settings to be set
+   */
+  void driver_configure(const settings& p_new_setting) override;
 
-  status driver_configure(const settings& p_new_setting) override;
-
-  result<transaction_t> driver_transaction(
+  void driver_transaction(
     hal::byte p_address,
     std::span<const hal::byte> p_data_out,
     std::span<hal::byte> p_data_in,

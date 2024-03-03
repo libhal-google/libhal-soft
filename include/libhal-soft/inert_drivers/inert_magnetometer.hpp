@@ -25,23 +25,17 @@ class inert_magnetometer : public hal::magnetometer
 {
 public:
   /**
-   * @brief Factory function to create an inert_magnetometer object
+   * @brief Create an inert_magnetometer object
    *
-   * @param p_result - read_t object to return when read() is called
-   * @return result<inert_magnetometer> - Constructed inert_magnetometer object
+   * @param p_result - what will be returned from the read function.
    */
-  static result<inert_magnetometer> create(read_t p_result)
-  {
-    return inert_magnetometer(p_result);
-  }
-
-private:
   constexpr inert_magnetometer(read_t p_result)
     : m_result(p_result)
   {
   }
 
-  result<read_t> driver_read()
+private:
+  read_t driver_read()
   {
     return m_result;
   };

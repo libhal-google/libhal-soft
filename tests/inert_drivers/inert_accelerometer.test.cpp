@@ -23,15 +23,15 @@ void inert_accelerometer_test()
   "inert_accelerometer"_test = []() {
     // Setup
     constexpr auto expected = accelerometer::read_t{ 0.1f, 0.2f, 0.3f };
-    auto test = inert_accelerometer::create(expected).value();
+    inert_accelerometer test(expected);
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(that % expected.x == result.value().x);
-    expect(that % expected.y == result.value().y);
-    expect(that % expected.z == result.value().z);
+    expect(that % expected.x == result.x);
+    expect(that % expected.y == result.y);
+    expect(that % expected.z == result.z);
   };
 };
 }  // namespace hal::soft

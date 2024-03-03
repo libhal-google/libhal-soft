@@ -24,32 +24,30 @@ input_pin_inverter::input_pin_inverter(hal::input_pin& p_input_pin)
 {
 }
 
-status output_pin_inverter::driver_configure(
+void output_pin_inverter::driver_configure(
   const hal::output_pin::settings& p_settings)
 {
-  return m_output_pin->configure(p_settings);
-};
-result<hal::output_pin::set_level_t> output_pin_inverter::driver_level(
-  bool p_high)
-{
-  return m_output_pin->level(!p_high);
-};
-result<hal::output_pin::level_t> output_pin_inverter::driver_level()
-{
-  auto level = HAL_CHECK(m_output_pin->level());
-  level.state = !level.state;
-  return level;
+  m_output_pin->configure(p_settings);
 };
 
-status input_pin_inverter::driver_configure(
+void output_pin_inverter::driver_level(bool p_high)
+{
+  m_output_pin->level(!p_high);
+};
+
+bool output_pin_inverter::driver_level()
+{
+  return !m_output_pin->level();
+};
+
+void input_pin_inverter::driver_configure(
   const hal::input_pin::settings& p_settings)
 {
-  return m_input_pin->configure(p_settings);
+  m_input_pin->configure(p_settings);
 };
-result<hal::input_pin::level_t> input_pin_inverter::driver_level()
+
+bool input_pin_inverter::driver_level()
 {
-  auto level = HAL_CHECK(m_input_pin->level());
-  level.state = !level.state;
-  return level;
+  return !m_input_pin->level();
 };
 }  // namespace hal::soft

@@ -25,7 +25,7 @@ class inert_serial : public hal::serial
 {
 public:
   /**
-   * @brief Factory function to create inert_serial object
+   * @brief Create inert_serial object
    *
    * @param p_write_data - write_t object to return when write() is called
    * @param p_read_data - read_t object to return when read() is called

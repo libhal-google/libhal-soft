@@ -22,13 +22,11 @@ void inert_dac_test()
   using namespace boost::ut;
   "inert_dac"_test = []() {
     // Setup
-    auto test = inert_dac::create().value();
+    inert_dac test;
 
     // Exercise
-    auto result = test.write(0.1f);
-
     // Verify
-    expect(bool{ result });
+    test.write(0.1f);
   };
 };
 }  // namespace hal::soft

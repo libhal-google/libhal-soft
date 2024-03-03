@@ -37,20 +37,18 @@ struct fake_i2c : public hal::i2c
     spy_transaction;
 
 private:
-  hal::status driver_configure(const settings& p_settings) final
+  void driver_configure(const settings& p_settings) final
   {
-    return spy_configure.record(p_settings);
+    spy_configure.record(p_settings);
   }
 
-  hal::result<transaction_t> driver_transaction(
-    [[maybe_unused]] hal::byte p_address,
-    [[maybe_unused]] std::span<const hal::byte> p_data_out,
-    [[maybe_unused]] std::span<hal::byte> p_data_in,
-    [[maybe_unused]] hal::function_ref<hal::timeout_function> p_timeout) final
+  void driver_transaction(
+    hal::byte p_address,
+    std::span<const hal::byte> p_data_out,
+    std::span<hal::byte> p_data_in,
+    hal::function_ref<hal::timeout_function> p_timeout) final
   {
-    HAL_CHECK(
-      spy_transaction.record(p_address, p_data_out, p_data_in, p_timeout));
-    return transaction_t{};
+    spy_transaction.record(p_address, p_data_out, p_data_in, p_timeout);
   }
 };
 }  // namespace
@@ -75,55 +73,21 @@ void minimum_speed_test()
       };
       constexpr hal::i2c::settings expected_upper_boundary = { .clock_rate =
                                                                  3'000'000 };
-      constexpr hal::i2c::settings expected_lower = { .clock_rate = 1 };
-      constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
+      constexpr hal::i2c::settings expected_lower = { .clock_rate = 5 };
 
       // Exercise
-      auto mock = minimum_speed_i2c::create(mock_i2c).value();
+      minimum_speed_i2c mock(mock_i2c);
 
-      auto result1 = mock.configure(expected_upper_boundary);
-      auto result2 = mock.configure(minimum_default);
-      auto result3 = mock.configure(expected_lower);
-      auto result4 = mock.configure(expected_zero);
+      mock.configure(expected_upper_boundary);
+      mock.configure(minimum_default);
+      mock.configure(expected_lower);
 
       // Verify
-      expect(bool{ result1 });
-      expect(bool{ result2 });
-      expect(bool{ result3 });
-      expect(!result4);
       expect(expected_lower ==
              std::get<0>(mock_i2c.spy_configure.call_history().at(0)));
     };
 
-    "create() + configure() with frequency"_test = []() {
-      // Setup
-      fake_i2c mock_i2c;
-      constexpr std::uint32_t device_frequency = 1'000'000;
-      constexpr hal::i2c::settings choosen_frequency = { .clock_rate =
-                                                           device_frequency };
-      constexpr hal::i2c::settings expected_upper_boundary = { .clock_rate =
-                                                                 3'000'000 };
-      constexpr hal::i2c::settings expected_lower = { .clock_rate = 1 };
-      constexpr hal::i2c::settings expected_zero = { .clock_rate = 0 };
-
-      // Exercise
-      auto mock = minimum_speed_i2c::create(mock_i2c, device_frequency).value();
-
-      auto result1 = mock.configure(expected_upper_boundary);
-      auto result2 = mock.configure(choosen_frequency);
-      auto result3 = mock.configure(expected_lower);
-      auto result4 = mock.configure(expected_zero);
-
-      // Verify
-      expect(bool{ result1 });
-      expect(bool{ result2 });
-      expect(bool{ result3 });
-      expect(!result4);
-      expect(expected_lower ==
-             std::get<0>(mock_i2c.spy_configure.call_history().at(0)));
-    };
-
-    "transaction"_test = []() {
+    "transaction pass through"_test = []() {
       // Setup
       constexpr hal::byte expected_address{ 0xAA };
       constexpr std::array<const hal::byte, 2> data_out{ hal::byte{ 0xAB },
@@ -131,16 +95,12 @@ void minimum_speed_test()
       std::span<hal::byte> data_in;
       bool has_been_called = false;
       std::function<hal::timeout_function> expected_timeout =
-        [&has_been_called]() -> status {
-        has_been_called = true;
-        return {};
-      };
+        [&has_been_called]() { has_been_called = true; };
       fake_i2c mock_i2c;
-      auto mock = minimum_speed_i2c::create(mock_i2c).value();
+      minimum_speed_i2c mock(mock_i2c);
 
       // Exercise
-      auto result1 =
-        mock.transaction(expected_address, data_out, data_in, expected_timeout);
+      mock.transaction(expected_address, data_out, data_in, expected_timeout);
 
       // Verify
       auto transaction_call_info =

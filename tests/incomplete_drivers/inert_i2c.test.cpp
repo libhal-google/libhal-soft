@@ -29,7 +29,7 @@ void inert_i2c_test()
     const hal::function_ref<hal::timeout_function> timeout = []() {
       return success();
     };
-    auto test = inert_i2c::create().value();
+    auto test = inert_i2c::create();
 
     // Exercise
     auto configure_result = test.configure(configure_settings);

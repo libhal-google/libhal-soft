@@ -25,7 +25,7 @@ class inert_socket : public hal::socket
 {
 public:
   /**
-   * @brief Factory function to create inert_socket object
+   * @brief Create inert_socket object
    *
    * @param p_write_data - write_t object to return when write() is called
    * @param p_read_data - read_t object to return when read() is called

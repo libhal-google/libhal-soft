@@ -17,15 +17,7 @@
 
 int main()
 {
-  auto pwm = hal::soft::inert_pwm::create().value();
-  auto rc_servo = hal::soft::rc_servo::create(pwm, {});
-
+  hal::soft::inert_pwm pwm;
+  hal::soft::rc_servo rc_servo(pwm, {});
   return 0;
 }
-
-namespace boost {
-void throw_exception(std::exception const& e)
-{
-  hal::halt();
-}
-}  // namespace boost

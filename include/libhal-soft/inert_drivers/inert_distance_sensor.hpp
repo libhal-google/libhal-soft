@@ -25,28 +25,21 @@ class inert_distance_sensor : public hal::distance_sensor
 {
 public:
   /**
-   * @brief Factory function to create inert_distance_sensor object
+   * @brief Create inert_distance_sensor object
    *
-   * @param p_result - read_t data to be returned when calling read()
-   * @return result<inert_distance_sensor> - Constructed inert_distance_sensor
-   * object
+   * @param p_result - what will be returned from the read function.
    */
-  static result<inert_distance_sensor> create(read_t p_result)
-  {
-    return inert_distance_sensor(p_result);
-  }
-
-private:
-  constexpr inert_distance_sensor(read_t p_result)
+  constexpr inert_distance_sensor(hal::meters p_result)
     : m_result(p_result)
   {
   }
 
-  result<read_t> driver_read()
+private:
+  hal::meters driver_read()
   {
     return m_result;
   };
 
-  read_t m_result;
+  hal::meters m_result;
 };
 }  // namespace hal::soft

@@ -23,13 +23,11 @@ void inert_interrupt_pin_test()
   "inert_interrupt_pin"_test = []() {
     // Setup
     auto configure_settings = interrupt_pin::settings{};
-    auto test = inert_interrupt_pin::create().value();
+    inert_interrupt_pin test;
 
     // Exercise
-    auto result = test.configure(configure_settings);
-
     // Verify
-    expect(bool{ result });
+    test.configure(configure_settings);
   };
 };
 }  // namespace hal::soft

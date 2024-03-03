@@ -25,23 +25,13 @@ class inert_dac : public hal::dac
 {
 public:
   /**
-   * @brief Factory function to create inert_dac object
-   *
-   * @return result<inert_dac> - Constructed inert_dac object
+   * @brief Create inert_dac object
    */
-  static result<inert_dac> create()
-  {
-    return inert_dac();
-  }
-
-private:
   constexpr inert_dac()
   {
   }
 
-  result<write_t> driver_write([[maybe_unused]] float p_percentage)
-  {
-    return write_t{};
-  };
+private:
+  void driver_write([[maybe_unused]] float p_percentage){};
 };
 }  // namespace hal::soft

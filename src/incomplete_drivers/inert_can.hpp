@@ -27,7 +27,7 @@ class inert_can : public hal::can
 {
 public:
   /**
-   * @brief Factory function to create inert_can object
+   * @brief Create inert_can object
    *
    * @param p_bus_on - State of inert can bus. Setting this value to true will
    * return success when bus_on() is called, and setting this value to false

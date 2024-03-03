@@ -22,20 +22,19 @@ void inert_steady_clock_test()
   using namespace boost::ut;
   "inert_steady_clock"_test = []() {
     // Setup
-    constexpr auto expected_frequency = steady_clock::frequency_t{ 0.5f };
-    constexpr auto start_uptime = steady_clock::uptime_t{ 99 };
-    constexpr auto expected_uptime = steady_clock::uptime_t{ 100 };
-    auto test =
-      inert_steady_clock::create(expected_frequency, start_uptime).value();
+    constexpr hal::hertz expected_frequency = 0.5f;
+    constexpr std::uint64_t start_uptime = 99;
+    constexpr std::uint64_t expected_uptime = 100;
+
+    inert_steady_clock test(expected_frequency, start_uptime);
 
     // Exercise
     auto frequency_result = test.frequency();
     auto uptime_result = test.uptime();
 
     // Verify
-    expect(that % expected_frequency.operating_frequency ==
-           frequency_result.operating_frequency);
-    expect(that % expected_uptime.ticks == uptime_result.ticks);
+    expect(that % expected_frequency == frequency_result);
+    expect(that % expected_uptime == uptime_result);
   };
 };
 }  // namespace hal::soft

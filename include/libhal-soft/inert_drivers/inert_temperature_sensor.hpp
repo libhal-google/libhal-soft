@@ -25,28 +25,21 @@ class inert_temperature_sensor : public hal::temperature_sensor
 {
 public:
   /**
-   * @brief Factory function to create inert_temperature_sensor object
+   * @brief Create inert_temperature_sensor object
    *
-   * @param p_temperature - read_t object to return when read() is called
-   * @return result<inert_temperature_sensor> - Constructed
-   * inert_temperature_sensor object
+   * @param p_temperature - hal::celsius object to return when read() is called
    */
-  static result<inert_temperature_sensor> create(read_t p_temperature)
-  {
-    return inert_temperature_sensor(p_temperature);
-  }
-
-private:
-  constexpr inert_temperature_sensor(read_t p_temperature)
+  constexpr inert_temperature_sensor(hal::celsius p_temperature)
     : m_temperature(p_temperature)
   {
   }
 
-  result<read_t> driver_read()
+private:
+  hal::celsius driver_read()
   {
     return m_temperature;
   };
 
-  read_t m_temperature;
+  hal::celsius m_temperature;
 };
 }  // namespace hal::soft

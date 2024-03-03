@@ -22,15 +22,14 @@ void inert_distance_sensor_test()
   using namespace boost::ut;
   "inert_distance_sensor"_test = []() {
     // Setup
-    constexpr auto expected_read = distance_sensor::read_t{ 0.1f };
-    auto test = inert_distance_sensor::create(expected_read).value();
+    constexpr hal::meters expected_read = 0.1f;
+    inert_distance_sensor test(expected_read);
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(bool{ result });
-    expect(that % expected_read.distance == result.value().distance);
+    expect(that % expected_read == result);
   };
 };
 }  // namespace hal::soft

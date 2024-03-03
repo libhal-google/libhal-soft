@@ -23,14 +23,13 @@ void inert_rotation_sensor_test()
   "inert_rotation_sensor"_test = []() {
     // Setup
     constexpr auto expected_read = rotation_sensor::read_t{ 0.1f };
-    auto test = inert_rotation_sensor::create(expected_read).value();
+    inert_rotation_sensor test(expected_read);
 
     // Exercise
     auto result = test.read();
 
     // Verify
-    expect(bool{ result });
-    expect(that % expected_read.angle == result.value().angle);
+    expect(that % expected_read.angle == result.angle);
   };
 };
 }  // namespace hal::soft

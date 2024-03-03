@@ -28,7 +28,7 @@ void inert_socket_test()
     std::array<hal::byte, 4> buffer;
     auto write_data = socket::write_t{};
     auto read_data = socket::read_t{};
-    auto test = inert_socket::create(write_data, read_data).value();
+    auto test = inert_socket::create(write_data, read_data);
 
     // Exercise
     auto write_result = test.write(buffer, always_succeed);

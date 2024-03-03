@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    uses: libhal/ci/.github/workflows/deploy-all.yml@5.x.y
+    uses: libhal/ci/.github/workflows/deploy_all.yml@5.x.y
     with:
       version: 4.0.0
     secrets: inherit

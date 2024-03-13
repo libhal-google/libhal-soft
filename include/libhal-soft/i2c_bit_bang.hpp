@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
 #include <libhal-lpc40/output_pin.hpp>
 #include <libhal/i2c.hpp>
+#include <libhal/units>
+#include <chrono>
 
-#include "i2c_bit_ban_constants.hpp"
+#include "i2c_bit_bang_constants.hpp"
 
 namespace hal {
 /**
@@ -27,6 +31,7 @@ namespace hal {
 class i2c_bit_bang : public i2c 
 {
 public:
+
     using write_iterator = std::span<const hal::byte>::iterator;
     using read_iterator = std::span<hal::byte>::iterator;
 
@@ -74,6 +79,16 @@ private:
      * frequencies
      */
     steady_clock* m_clock;
+
+    /**
+     * @brief the time that scl will be held high for
+     */
+    std::chrono::nanoseconds m_scl_high_time;
+    /**
+     * @brief the time that scl will be held low for
+     */
+    std::chrono::nanoseconds m_scl_low_time;
+
     /**
      * @brief all the information that the bus will need to operate on
      */

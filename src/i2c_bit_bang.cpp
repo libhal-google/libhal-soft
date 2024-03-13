@@ -1,5 +1,11 @@
+#include <chrono>
+
 #include <libhal-soft/i2c_bit_bang.hpp>
+#include <libhal-util/steady_clock.hpp>
 #include <libhal-util/bit.hpp>
+#include <libhal/units.hpp>
+#include <libhal/error.hpp>
+
 
 namespace hal {
     // public
@@ -82,7 +88,16 @@ i2c_host_state i2c_bit_bang::operation_state_machine(i2c_host_state p_state, fun
 }
 
 void i2c_bit_bang::driver_configure(const settings& p_settings) {
+    using namespace std::chrono_literals;
 
+    if(p_settings.clock_rate > m_clock.frequency) {
+        throw hal::operation_not_supported;
+    }
+    // calculate period in microseconds
+    std::chrono::seconds period_s = 1.0f/p_settings.clock_rate;
+    auto period_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(period_s); 
+    m_scl_high_time = period_ns * m_bus.duty_cycle;
+    m_scl_low_time = period_ns - m_scl_high_time;
 }
 
 void i2c_bit_bang::driver_transaction(hal::byte p_address,
@@ -97,7 +112,7 @@ function_ref<hal::timeout_function> p_timeout) {
     m_read_iterator = p_data_in.begin();
     m_read_end = p_data_in.end();
 
-    for() {
+    while((m_write_iterator != m_write_end) && (m_read_iterator != m_read_end)) {
         state = operation_state_machine(state, p_timeout);
         p_timeout();
     }
@@ -142,15 +157,20 @@ bool i2c_bit_bang::write_byte(hal::byte p_byte_to_write, function_ref<hal::timeo
     After this is done, you are able to set the clock back low.
 */
 void i2c_bit_bang::write_bit(hal::byte p_bit_to_write, function_ref<hal::timeout_function> p_timeout) {
+    
     m_sda.level(static_cast<bool>(p_bit_to_write));
+
     m_scl.level(true);
+    delay(m_clock, m_scl_high_time);
     // if scl is still low after we set it high, then the peripheral is clock
     // stretching
     while(m_scl.level() == 0)
     {
         p_timeout();
     }
+    
     m_scl.level(false);
+    delay(m_clock, m_scl_low_time);
 }
 /* 
     after reading out the entire byte you then want to have the reciever send 
@@ -167,8 +187,13 @@ void i2c_bit_bang::read_byte() {
 
 hal::byte i2c_bit_bang::read_bit() {
     m_scl.level(true);
+    delay(m_clock, m_scl_high_time);
+
     auto bit_read = static_cast<hal::byte>(m_sda.level());
+
     m_scl.level(false);
+    delay(m_clock, m_scl_low_time);
+
     return bit_read;
 }
 

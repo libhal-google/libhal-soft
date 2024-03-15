@@ -17,8 +17,6 @@ i2c_bit_bang::i2c_bit_bang(output_pin& p_scl,
   , m_clock(&p_clock)
   , m_bus(p_bus)
 {
-  m_sda->level(true);
-  m_scl->level(true);
 }
 
 i2c_host_state i2c_bit_bang::operation_state_machine(
@@ -29,7 +27,6 @@ i2c_host_state i2c_bit_bang::operation_state_machine(
   switch (p_state) {
     case i2c_host_state::start:
     case i2c_host_state::repeated_start: 
-      using namespace std::chrono_literals;
       send_start_condition();
       p_state = i2c_host_state::write_address;
       break;
@@ -43,11 +40,13 @@ i2c_host_state i2c_bit_bang::operation_state_machine(
         address_to_write = hal::bit_modify(m_address)
                              .clear<read_write_bit_mask>()
                              .to<hal::byte>();
-      } else {
+      } 
+      else {
         p_state = i2c_host_state::read;
         address_to_write =
           hal::bit_modify(m_address).set<read_write_bit_mask>().to<hal::byte>();
       }
+      // write the address
       auto acknowledged = write_byte(address_to_write, p_timeout);
 
       // if ack_bit = 1 then this indicates that no peripheral responded (nack)
@@ -58,57 +57,60 @@ i2c_host_state i2c_bit_bang::operation_state_machine(
     }
     case i2c_host_state::write: {
 
-      for (; m_write_iterator < m_write_end; m_write_iterator++) {
-        auto acknowledged = write_byte(*m_write_iterator, p_timeout);
+      auto acknowledged = write_byte(*m_write_iterator, p_timeout);
+      m_write_iterator++;
 
-        // if acknowledged = 1 then an error has occured (nack)
-        if (!acknowledged) {
-          p_state = i2c_host_state::bus_error;
-          return p_state;
-        }
+      // if acknowledged = 1 then an error has occured (nack)
+      if (!acknowledged) {
+        p_state = i2c_host_state::bus_error;
+        return p_state;
       }
 
       // after writing, if the read iterators aren't done, then it's a
-      // repeated start
-      if (m_read_iterator != m_read_end) {
+      // repeated start otherwise continue writing
+      if (m_write_iterator < m_write_end) {
+        p_state = p_state;
+      }
+      else if (m_read_iterator != m_read_end) {
         p_state = i2c_host_state::repeated_start;
       } else {
-        p_state = i2c_host_state::stop;
+        p_state = i2c_host_state::send_stop;
       }
       
-      // release the sda line 
-      m_sda->level(true);
-      delay(*m_clock, m_scl_high_time);
-      m_scl->level(true);
-      delay(*m_clock, m_scl_high_time);
     break;
     }
     case i2c_host_state::read: {
-      while (true) {
-        read_byte();
-        m_read_iterator++;
-        // when the data is done being read in, then send a NACK to tell the
-        // slave to stop reading
-        if (m_read_iterator < m_read_end) {
-          write_bit(1, p_timeout);
-          p_timeout();
-          break;
-        } else {
-          // if the iterator isn't done, then we ack whatever data we read
-          write_bit(0, p_timeout);
-        }
+
+      read_byte();
+      m_read_iterator++;
+
+      // when the data is done being read in, then send a NACK to tell the
+      // slave to stop reading
+      if (m_read_iterator >= m_read_end) {
+        write_bit(1, p_timeout);
+        p_timeout();
+        p_state = i2c_host_state::send_stop;
+      } else {
+        // if the iterator isn't done, then we ack whatever data we read
+        write_bit(0, p_timeout);
+        p_state = p_state;
       }
-      p_state = i2c_host_state::stop;
       break;
     }
-    case i2c_host_state::stop:
+    case i2c_host_state::send_stop:
     case i2c_host_state::bus_error: {
       send_stop_condition();
+      p_state = i2c_host_state::done;
       break;
+    }
+    case i2c_host_state::done: {
+      // do nothing
     }
   }
   return p_state;
 }
+
+
 
 void i2c_bit_bang::driver_configure(const settings& p_settings)
 {
@@ -141,7 +143,7 @@ void i2c_bit_bang::driver_transaction(
   m_read_iterator = p_data_in.begin();
   m_read_end = p_data_in.end();
 
-  while ((state != i2c_host_state::stop) || (state != i2c_host_state::bus_error)) {
+  while (state != i2c_host_state::done) {
     state = operation_state_machine(state, p_timeout);
     p_timeout();
   }
@@ -154,7 +156,6 @@ void i2c_bit_bang::send_start_condition()
   using namespace std::chrono_literals;
   // the start condition requires both the sda and scl lines to be pulled high before sending, so we do that here.
   m_sda->level(true);
-  delay(*m_clock, m_scl_high_time);
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
   m_sda->level(false);
@@ -184,6 +185,9 @@ bool i2c_bit_bang::write_byte(hal::byte p_byte_to_write,
     bit_to_write = static_cast<hal::byte>((p_byte_to_write >> (byte_length - (i+1))) & bit_select);
     write_bit(bit_to_write, p_timeout);
   }
+
+  m_sda->level(true);
+  // delay(*m_clock, m_scl_high_time);
   // look for the ack
   auto ack_bit = read_bit();
   // if ack bit is 0, then it was acknowledged

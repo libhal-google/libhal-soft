@@ -10,8 +10,8 @@ enum class i2c_host_state : std::uint32_t
   write = 4,
   read = 5,
   stop = 6,
-//   arbitration_lost = ,
-//   own_address_received = ,
-//   do_nothing = 
+  //   arbitration_lost = ,
+  //   own_address_received = ,
+  //   do_nothing =
 };
 }

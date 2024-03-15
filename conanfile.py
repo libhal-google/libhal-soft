@@ -59,7 +59,7 @@ class libhal_soft_conan(ConanFile):
 
     def requirements(self):
         self.requires("libhal/[^3.0.0]", transitive_headers=True)
-        self.requires("libhal-util/[^4.0.0]")
+        self.requires("libhal-util/[^4.0.1]")
 
     def layout(self):
         cmake_layout(self)

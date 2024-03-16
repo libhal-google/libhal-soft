@@ -92,7 +92,7 @@ void i2c_bit_bang::send_start_condition()
 void i2c_bit_bang::send_stop_condition()
 {
   m_sda->level(false);
-  // delay(*m_clock, m_scl_high_time);
+  
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
   m_sda->level(true);

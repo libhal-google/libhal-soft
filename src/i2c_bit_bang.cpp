@@ -2,6 +2,7 @@
 
 #include <libhal-soft/i2c_bit_bang.hpp>
 #include <libhal-util/bit.hpp>
+#include <libhal-util/i2c.hpp>
 #include <libhal-util/steady_clock.hpp>
 #include <libhal/error.hpp>
 #include <libhal/units.hpp>
@@ -18,99 +19,6 @@ i2c_bit_bang::i2c_bit_bang(output_pin& p_scl,
   , m_bus(p_bus)
 {
 }
-
-i2c_host_state i2c_bit_bang::operation_state_machine(
-  i2c_host_state p_state,
-  function_ref<hal::timeout_function> p_timeout)
-{
-  constexpr auto read_write_bit_mask = hal::bit_mask::from<0, 0>();
-  switch (p_state) {
-    case i2c_host_state::start:
-    case i2c_host_state::repeated_start: 
-      send_start_condition();
-      p_state = i2c_host_state::write_address;
-      break;
-
-    case i2c_host_state::write_address: {
-      hal::byte address_to_write;
-
-      // select read or write
-      if (m_write_iterator != m_write_end) {
-        p_state = i2c_host_state::write;
-        address_to_write = hal::bit_modify(m_address)
-                             .clear<read_write_bit_mask>()
-                             .to<hal::byte>();
-      } 
-      else {
-        p_state = i2c_host_state::read;
-        address_to_write =
-          hal::bit_modify(m_address).set<read_write_bit_mask>().to<hal::byte>();
-      }
-      // write the address
-      auto acknowledged = write_byte(address_to_write, p_timeout);
-
-      // if ack_bit = 1 then this indicates that no peripheral responded (nack)
-      if (!acknowledged) {
-        p_state = i2c_host_state::bus_error;
-      }
-      break;
-    }
-    case i2c_host_state::write: {
-
-      auto acknowledged = write_byte(*m_write_iterator, p_timeout);
-      m_write_iterator++;
-
-      // if acknowledged = 1 then an error has occured (nack)
-      if (!acknowledged) {
-        p_state = i2c_host_state::bus_error;
-        return p_state;
-      }
-
-      // after writing, if the read iterators aren't done, then it's a
-      // repeated start otherwise continue writing
-      if (m_write_iterator < m_write_end) {
-        p_state = p_state;
-      }
-      else if (m_read_iterator != m_read_end) {
-        p_state = i2c_host_state::repeated_start;
-      } else {
-        p_state = i2c_host_state::send_stop;
-      }
-      
-    break;
-    }
-    case i2c_host_state::read: {
-
-      read_byte();
-      m_read_iterator++;
-
-      // when the data is done being read in, then send a NACK to tell the
-      // slave to stop reading
-      if (m_read_iterator >= m_read_end) {
-        write_bit(1, p_timeout);
-        p_timeout();
-        p_state = i2c_host_state::send_stop;
-      } else {
-        // if the iterator isn't done, then we ack whatever data we read
-        write_bit(0, p_timeout);
-        p_state = p_state;
-      }
-      break;
-    }
-    case i2c_host_state::send_stop:
-    case i2c_host_state::bus_error: {
-      send_stop_condition();
-      p_state = i2c_host_state::done;
-      break;
-    }
-    case i2c_host_state::done: {
-      // do nothing
-    }
-  }
-  return p_state;
-}
-
-
 
 void i2c_bit_bang::driver_configure(const settings& p_settings)
 {
@@ -135,18 +43,33 @@ void i2c_bit_bang::driver_transaction(
   function_ref<hal::timeout_function> p_timeout)
 {
 
-  i2c_host_state state = i2c_host_state::start;
-  // the address should always be in the last 7 bits, so shift it by 1
-  m_address = p_address << 1;
-  m_write_iterator = p_data_out.begin();
-  m_write_end = p_data_out.end();
-  m_read_iterator = p_data_in.begin();
-  m_read_end = p_data_in.end();
+  hal::i2c_operation operation;
+  hal::byte address_to_write;
 
-  while (state != i2c_host_state::done) {
-    state = operation_state_machine(state, p_timeout);
-    p_timeout();
+  // select read or write
+  if (!p_data_out.empty()) {
+    send_start_condition();
+    operation = hal::i2c_operation::write;
+    address_to_write = hal::to_8_bit_address(p_address, operation);
+
+    write_address(address_to_write, p_timeout);
+
+    write(p_data_out, p_timeout);
   }
+
+  // if the first bit is 1 then we read
+  if (!p_data_in.empty()) {
+    send_start_condition();
+
+    operation = hal::i2c_operation::read;
+    address_to_write = hal::to_8_bit_address(p_address, operation);
+
+    write_address(address_to_write, p_timeout);
+
+    read(p_data_in, p_timeout);
+  }
+
+  send_stop_condition();
 }
 
 // private
@@ -154,8 +77,10 @@ void i2c_bit_bang::driver_transaction(
 void i2c_bit_bang::send_start_condition()
 {
   using namespace std::chrono_literals;
-  // the start condition requires both the sda and scl lines to be pulled high before sending, so we do that here.
+  // the start condition requires both the sda and scl lines to be pulled high
+  // before sending, so we do that here.
   m_sda->level(true);
+  // delay(*m_clock, m_scl_high_time);
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
   m_sda->level(false);
@@ -167,33 +92,58 @@ void i2c_bit_bang::send_start_condition()
 void i2c_bit_bang::send_stop_condition()
 {
   m_sda->level(false);
-  delay(*m_clock, m_scl_high_time);
+  // delay(*m_clock, m_scl_high_time);
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
   m_sda->level(true);
   delay(*m_clock, m_scl_high_time);
 }
 
+void i2c_bit_bang::write_address(hal::byte p_address,
+                                 function_ref<hal::timeout_function> p_timeout)
+{
+  // write the address
+  auto acknowledged = write_byte(p_address, p_timeout);
+
+  if (!acknowledged) {
+    hal::safe_throw(hal::no_such_device((p_address >> 1), this));
+  }
+}
+
+void i2c_bit_bang::write(std::span<const hal::byte> p_data_out,
+                         function_ref<hal::timeout_function> p_timeout)
+{
+  bool acknowledged;
+  for (const hal::byte& data : p_data_out) {
+
+    acknowledged = write_byte(data, p_timeout);
+
+    if (!acknowledged) {
+      hal::safe_throw(hal::io_error(this));
+    }
+  }
+}
+
 bool i2c_bit_bang::write_byte(hal::byte p_byte_to_write,
                               function_ref<hal::timeout_function> p_timeout)
 {
+  using namespace std::chrono_literals;
   constexpr auto byte_length = 8;
   constexpr hal::byte bit_select = 0b0000'0001;
   hal::byte bit_to_write = 0;
-  // not using the bit library here since it's a serialization
-  for (int i = 0; i < byte_length; i++) {
-    bit_to_write = static_cast<hal::byte>((p_byte_to_write >> (byte_length - (i+1))) & bit_select);
+  uint32_t i;
+  for (i = 0; i < byte_length; i++) {
+
+    bit_to_write = static_cast<hal::byte>(
+      (p_byte_to_write >> (byte_length - (i + 1))) & bit_select);
+
     write_bit(bit_to_write, p_timeout);
   }
 
-  m_sda->level(true);
-  // delay(*m_clock, m_scl_high_time);
   // look for the ack
   auto ack_bit = read_bit();
-  // if ack bit is 0, then it was acknowledged
-  auto acknowledged = (ack_bit == 0);
-
-  return acknowledged;
+  // if ack bit is 0, then it was acknowledged (true)
+  return (ack_bit == 0);
 }
 /*
    for writing a bit you want to make set the data line first, then toggle the
@@ -204,15 +154,10 @@ bool i2c_bit_bang::write_byte(hal::byte p_byte_to_write,
 void i2c_bit_bang::write_bit(hal::byte p_bit_to_write,
                              function_ref<hal::timeout_function> p_timeout)
 {
-
   m_sda->level(static_cast<bool>(p_bit_to_write));
-
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
 
-  // if(p_bit_to_write != m_sda->level()) {
-  //     return
-  // }
   // if scl is still low after we set it high, then the peripheral is clock
   // stretching
   while (m_scl->level() == 0) {
@@ -222,21 +167,41 @@ void i2c_bit_bang::write_bit(hal::byte p_bit_to_write,
   m_scl->level(false);
   delay(*m_clock, m_scl_low_time);
 }
-/*
-    after reading out the entire byte you then want to have the reciever send
-*/
-void i2c_bit_bang::read_byte()
+
+void i2c_bit_bang::read(std::span<hal::byte> p_data_in,
+                        function_ref<hal::timeout_function> p_timeout)
+{
+  uint32_t size_of_span = p_data_in.size(), i = 0;
+  for (hal::byte& data : p_data_in) {
+    data = read_byte();
+    i++;
+
+    if (i < size_of_span) {
+      // if the iterator isn't done, then we ack whatever data we read
+      write_bit(0, p_timeout);
+
+    } else {
+    // when the data is done being read in, then send a NACK to tell the
+    // slave to stop reading
+      write_bit(1, p_timeout);
+    }
+  }
+}
+
+hal::byte i2c_bit_bang::read_byte()
 {
   constexpr auto byte_length = 8;
   hal::byte read_byte = 0;
-  for (int i = 0; i < byte_length; i++) {
+  uint32_t i;
+  for (i = 1; i <= byte_length; i++) {
     read_byte |= (read_bit() << (byte_length - i));
   }
-  *m_read_iterator = read_byte;
+  return read_byte;
 }
 
 hal::byte i2c_bit_bang::read_bit()
 {
+  m_sda->level(true);
   m_scl->level(true);
   delay(*m_clock, m_scl_high_time);
 

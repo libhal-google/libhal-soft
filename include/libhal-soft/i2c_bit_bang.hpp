@@ -46,11 +46,8 @@ public:
                steady_clock& p_steady_clock,
                bus_info p_bus);
 
-  i2c_host_state operation_state_machine(
-    i2c_host_state p_state,
-    function_ref<hal::timeout_function> p_timeout);
-
   void driver_configure(const settings& p_settings) override;
+
   virtual void driver_transaction(
     hal::byte p_address,
     std::span<const hal::byte> p_data_out,
@@ -62,13 +59,22 @@ private:
 
   void send_stop_condition();
 
+  void write_address(hal::byte p_address,
+                     function_ref<hal::timeout_function> p_timeout);
+
+  void write(std::span<const hal::byte> p_data_out,
+             function_ref<hal::timeout_function> p_timeout);
+
   bool write_byte(hal::byte p_byte_to_write,
                   function_ref<hal::timeout_function> p_timeout);
 
   void write_bit(hal::byte p_bit_to_write,
                  function_ref<hal::timeout_function> p_timeout);
 
-  void read_byte();
+  void read(std::span<hal::byte> p_data_in,
+            function_ref<hal::timeout_function> p_timeout);
+
+  hal::byte read_byte();
 
   hal::byte read_bit();
 
@@ -99,30 +105,5 @@ private:
    * @brief all the information that the bus will need to operate on
    */
   bus_info m_bus;
-
-  /**
-   * @brief stores the address of the next device this driver will access
-   *
-   */
-  hal::byte m_address = hal::byte{ 0x00 };
-
-  /**
-   * @brief used to iterate from the beginning of the write message to the end
-   * (m_write_end)
-   */
-  write_iterator m_write_iterator;
-  /**
-   * @brief used to keep track of the end of the writemessage
-   */
-  write_iterator m_write_end;
-  /**
-   * @brief used to iterate from the beginning of the read message to the end
-   * (m_read_end)
-   */
-  read_iterator m_read_iterator;
-  /**
-   * @brief used to keep track of the end of the read message
-   */
-  read_iterator m_read_end;
 };
 }  // namespace hal

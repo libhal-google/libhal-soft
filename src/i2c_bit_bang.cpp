@@ -27,13 +27,47 @@ void i2c_bit_bang::driver_configure(const settings& p_settings)
   if (p_settings.clock_rate > m_clock->frequency()) {
     throw hal::operation_not_supported(this);
   }
-  // calculate period in microsecond
+
+  // calculate period in nanosecond
   float nanoseconds_per_second = 1'000'000'000.0f;
   uint32_t period_ns = nanoseconds_per_second / p_settings.clock_rate;
-  m_scl_high_time = static_cast<std::chrono::nanoseconds>(
+  auto scl_high_time = static_cast<std::chrono::nanoseconds>(
     static_cast<uint32_t>(period_ns * m_bus.duty_cycle));
-  m_scl_low_time =
-    static_cast<std::chrono::nanoseconds>(period_ns) - m_scl_high_time;
+  auto scl_low_time =
+    static_cast<std::chrono::nanoseconds>(period_ns) - scl_high_time;
+
+  // calculate ticks for high and low
+  using period = decltype(scl_high_time)::period;
+  const auto frequency = m_clock->frequency();
+  const auto tick_period = hal::wavelength<period>(frequency);
+
+  auto ticks_required_high = scl_high_time / tick_period;
+  using unsigned_ticks = std::make_unsigned_t<decltype(ticks_required_high)>;
+  m_scl_high_ticks = static_cast<unsigned_ticks>(ticks_required_high);
+
+  auto ticks_required_low = scl_low_time / tick_period;
+  m_scl_low_ticks = static_cast<unsigned_ticks>(ticks_required_low);
+
+  // calculate the delay due to the uptime function call
+  const auto callibration_start_tick = m_clock->uptime();
+  const auto callibration_end_tick = m_clock->uptime();
+  m_uptime_ticks = callibration_end_tick - callibration_start_tick;
+
+  // calculating output_pin going to true delay time
+  const auto before_output_high = m_clock->uptime();
+  m_scl->level(true);
+  const auto after_output_high = m_clock->uptime();
+  const auto output_true_ticks = after_output_high - before_output_high;
+
+  m_scl_high_ticks -= output_true_ticks;
+
+  // calculating output_pin going to false delay time
+  const auto before_output_low = m_clock->uptime();
+  m_scl->level(false);
+  const auto after_output_low = m_clock->uptime();
+  const auto output_false_ticks = after_output_low - before_output_low;
+  
+  m_scl_low_ticks -= output_false_ticks;
 }
 
 void i2c_bit_bang::driver_transaction(
@@ -80,13 +114,12 @@ void i2c_bit_bang::send_start_condition()
   // the start condition requires both the sda and scl lines to be pulled high
   // before sending, so we do that here.
   m_sda->level(true);
-  // delay(*m_clock, m_scl_high_time);
   m_scl->level(true);
-  delay(*m_clock, m_scl_high_time);
+  high_speed_delay(m_scl_high_ticks);
   m_sda->level(false);
-  delay(*m_clock, m_scl_low_time);
+  high_speed_delay(m_scl_high_ticks);
   m_scl->level(false);
-  delay(*m_clock, m_scl_low_time);
+  high_speed_delay(m_scl_high_ticks);
 }
 
 void i2c_bit_bang::send_stop_condition()
@@ -94,9 +127,9 @@ void i2c_bit_bang::send_stop_condition()
   m_sda->level(false);
   
   m_scl->level(true);
-  delay(*m_clock, m_scl_high_time);
+  high_speed_delay(m_scl_high_ticks);
   m_sda->level(true);
-  delay(*m_clock, m_scl_high_time);
+  high_speed_delay(m_scl_high_ticks);
 }
 
 void i2c_bit_bang::write_address(hal::byte p_address,
@@ -156,7 +189,7 @@ void i2c_bit_bang::write_bit(hal::byte p_bit_to_write,
 {
   m_sda->level(static_cast<bool>(p_bit_to_write));
   m_scl->level(true);
-  delay(*m_clock, m_scl_high_time);
+  high_speed_delay(m_scl_high_ticks);
 
   // if scl is still low after we set it high, then the peripheral is clock
   // stretching
@@ -165,7 +198,7 @@ void i2c_bit_bang::write_bit(hal::byte p_bit_to_write,
   }
 
   m_scl->level(false);
-  delay(*m_clock, m_scl_low_time);
+  high_speed_delay(m_scl_low_ticks);
 }
 
 void i2c_bit_bang::read(std::span<hal::byte> p_data_in,
@@ -203,14 +236,26 @@ hal::byte i2c_bit_bang::read_bit()
 {
   m_sda->level(true);
   m_scl->level(true);
-  delay(*m_clock, m_scl_high_time);
+  high_speed_delay(m_scl_high_ticks);
 
   auto bit_read = static_cast<hal::byte>(m_sda->level());
 
   m_scl->level(false);
-  delay(*m_clock, m_scl_low_time);
+  high_speed_delay(m_scl_low_ticks);
 
   return bit_read;
+}
+
+void i2c_bit_bang::high_speed_delay(uint64_t ticks) {
+  const auto start_time_high = m_clock->uptime();
+  uint64_t uptime = 0;
+
+  const auto ticks_until_timeout_high = ticks + start_time_high;
+
+  while (uptime < ticks_until_timeout_high) {
+    uptime = m_clock->uptime() + m_uptime_ticks;
+    continue;
+  }
 }
 
 }  // namespace hal

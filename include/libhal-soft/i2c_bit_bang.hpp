@@ -19,26 +19,24 @@
 #include <libhal/output_pin.hpp>
 #include <libhal/units.hpp>
 
-#include "i2c_bit_bang_constants.hpp"
-
 namespace hal {
 /**
- * @brief A bit bang implementation for I2C. This implementation of I2c only
+ * @brief A bit bang implementation for i2c. This implementation of i2c only
  * needs 2 gpio's to work correctly. In its current implementation we only
  * support single controller multiple peripheral. But have intentions of
- * supporting multiple controller soon.
- *
+ * supporting multiple controller soon. Additionally, it's important to note that bit bang
+ * is a best try implementation of i2c. As in it will do it's best to reach the requested frequency but will typically be slower then requested
+ * with brief testing it seems that the error is about 2us per period for the lpc4078 , so you can try to account for this error with the frequency you set
+ * for example, achieving the correct period for 100kHz would result in setting slightly more then a 125kHz frequency. Additionally, the fastest frequency this bit bang can handle is around 200kHz.
  */
 class i2c_bit_bang : public i2c
 {
 public:
-  using write_iterator = std::span<const hal::byte>::iterator;
-  using read_iterator = std::span<hal::byte>::iterator;
 
   /// holds all of the information for an i2c bus
   struct bus_info
   {
-    float duty_cycle;
+    float duty_cycle = 0.5f;
   };
 
   /**
@@ -140,6 +138,14 @@ private:
   hal::byte read_bit();
 
   /**
+   * @brief this function is a high speed version of the hal::delay function which operates on ticks rather then a time duration
+   * where hal::delay provides delays up to 17us, this function will provide delays up to about 2.7us making it optimal for high accuracy delay
+   * 
+   * @param ticks the amount of ticks this function will delay for, this should be based on the frequency of the clock passed into the bit_bang class
+   */
+  [[gnu::always_inline]] inline void high_speed_delay(uint64_t ticks);
+
+  /**
    * @brief an output pin which will mimic the behavior of an I2C scl pin
    */
   output_pin* m_scl;
@@ -156,11 +162,16 @@ private:
   /**
    * @brief the time that scl will be held high for
    */
-  std::chrono::nanoseconds m_scl_high_time;
+  uint64_t m_scl_high_ticks;
   /**
    * @brief the time that scl will be held low for
    */
-  std::chrono::nanoseconds m_scl_low_time;
+  uint64_t m_scl_low_ticks;
+
+  /**
+   * @brief the amount of ticks that the uptime function takes to run, we store this so we save computation time in our high speed delay function
+   */
+  uint32_t m_uptime_ticks;
 
   /**
    * @brief all the information that the bus will need to operate on
